@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AppHaat: buy and sell apps and websites</title>
+<meta name="description" content="Buy and sell apps and websites on AppHaat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6fa; --card:#ffffff; --text:#1c2030; --muted:#5c6380; --line:#e1e4ef;
+  --ink:#1b2559; --stripe:#1b2559; --gold:#f5a623; --green:#167a4f; --red:#b3261e;
+  --head:#1b2559; --btn:#1b2559; --btn-text:#ffffff;
+  --font-head:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Hind",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#12152a; --card:#1b1f3a; --text:#eceefa; --muted:#a3a9c8; --line:#2b3158;
+    --stripe:#3a46a0; --head:#e9ecff; --btn:#f5a623; --btn-text:#1b1400; --green:#46c486; --red:#ff8a80;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:var(--font-head);color:var(--head);margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-in{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:var(--font-head);font-weight:700;font-size:26px;color:var(--head);text-decoration:none}
+.logo b{color:var(--gold);font-weight:700}
+.who{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;font-size:14px;color:var(--muted)}
+.who span{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.btn{background:var(--btn);color:var(--btn-text);border:0;border-radius:10px;padding:9px 16px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--head);border:1.5px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:wait}
+
+main{max-width:960px;margin:0 auto;padding:16px}
+.intro{padding:14px 0 6px}
+.intro h1{font-size:30px}
+.intro p{margin:6px 0 0;color:var(--muted)}
+
+.tools{display:flex;flex-direction:column;gap:10px;margin:14px 0 8px}
+.search{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--btn);color:var(--btn-text);border-color:var(--btn)}
+
+.sec-title{font-size:22px;margin:22px 0 10px}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}.grid.feat{grid-template-columns:repeat(3,1fr)}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;width:100%;padding:0}
+.card .body{padding:12px 14px 14px;display:flex;gap:12px;align-items:flex-start}
+.awning{height:10px;background:repeating-linear-gradient(90deg,var(--gold) 0 18px,var(--stripe) 18px 36px)}
+.icon{width:56px;height:56px;border-radius:12px;background:var(--line);object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:700;font-size:22px;color:var(--head)}
+.info{min-width:0;flex:1}
+.info h3{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:4px;font-size:14px;color:var(--muted)}
+.price{font-weight:600;color:var(--text)}
+.ok{color:var(--green);font-weight:600}
+.rank{font-size:13px;font-weight:600;color:var(--head)}
+
+.empty{padding:26px 16px;border:1.5px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+.foot{max-width:960px;margin:30px auto 40px;padding:0 16px;color:var(--muted);font-size:13px}
+
+dialog{border:0;border-radius:14px;padding:0;width:min(92vw,440px);background:var(--card);color:var(--text);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(10,12,30,.55)}
+.dlg{padding:18px}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.x{background:none;border:0;font-size:26px;line-height:1;cursor:pointer;color:var(--muted)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+label{display:block;font-weight:500;margin:10px 0 4px}
+input.f,select.f,textarea.f{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg)}
+textarea.f{resize:vertical;min-height:110px}
+.mine{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.mrow{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.tag{font-size:13px;font-weight:600;color:var(--head);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.msg{min-height:22px;margin-top:10px;font-size:14px}
+.msg.err{color:var(--red)} .msg.good{color:var(--green)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.desc{white-space:pre-wrap;margin:12px 0;overflow-wrap:anywhere}
+.safe{font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding:6px 10px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;max-width:90vw}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="./">App<b>Haat</b></a>
+    <div class="who" id="who"><button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="loginBtn">Login</button></div>
+  </div>
+</header>
+
+<main>
+  <section class="intro">
+    <h1>Buy and sell apps and websites</h1>
+    <p>Find apps and websites from verified sellers, or list your own.</p>
+  </section>
+
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="Search apps and websites" aria-label="Search listings">
+    <div class="chips" id="chips">
+      <button class="chip" data-t="all" aria-pressed="true">All</button>
+      <button class="chip" data-t="app" aria-pressed="false">Apps</button>
+      <button class="chip" data-t="website" aria-pressed="false">Websites</button>
+    </div>
+  </div>
+
+  <section id="featWrap" hidden>
+    <h2 class="sec-title">Featured this week</h2>
+    <div class="grid feat" id="feat"></div>
+  </section>
+
+  <h2 class="sec-title">Latest listings</h2>
+  <div class="grid" id="list"></div>
+  <div class="empty" id="empty" hidden>No listings found yet. Be the first to list yours.</div>
+</main>
+
+<p class="foot">AppHaat is only a platform. Deals are made between the buyer and the seller. Always verify ownership before you pay.</p>
+
+<!-- Login / Sign up -->
+<dialog id="authDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2 id="authTitle">Login</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <div class="tabs">
+      <button class="chip" id="tabLogin" aria-pressed="true">Login</button>
+      <button class="chip" id="tabSignup" aria-pressed="false">Sign up</button>
+    </div>
+    <div id="authNote" class="msg"></div>
+    <label for="email">Email</label>
+    <input class="f" id="email" type="email" autocomplete="email" inputmode="email">
+    <label for="pass">Password (at least 6 characters)</label>
+    <input class="f" id="pass" type="password" autocomplete="current-password">
+    <div class="msg" id="authMsg" role="status" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="authGo">Login</button></div>
+  </div>
+</dialog>
+
+<!-- Listing detail -->
+<dialog id="detDlg">
+  <div class="dlg" id="det"></div>
+</dialog>
+
+<!-- Sell: add listing -->
+<dialog id="sellDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>List your app or website</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <div class="safe" id="sellLock" hidden></div>
+    <div id="sellForm">
+      <label for="sTitle">Title</label>
+      <input class="f" id="sTitle" type="text" maxlength="80">
+      <label for="sType">Type</label>
+      <select class="f" id="sType"><option value="app">App</option><option value="website">Website</option></select>
+      <label for="sLink">Link (website URL or app store link)</label>
+      <input class="f" id="sLink" type="url" inputmode="url" placeholder="https://">
+      <label for="sPrice">Selling price (USD)</label>
+      <input class="f" id="sPrice" type="number" inputmode="decimal" min="0" step="any">
+      <label for="sCat">Category (optional)</label>
+      <input class="f" id="sCat" type="text" maxlength="40" placeholder="Games, Tools, Blog, Shop...">
+      <label for="sDesc">Description</label>
+      <textarea class="f" id="sDesc" maxlength="3000" placeholder="Revenue, users, tech stack, why you are selling..."></textarea>
+      <label for="sIcon">Icon or logo (optional)</label>
+      <input class="f" id="sIcon" type="file" accept="image/png,image/jpeg,image/webp">
+      <div class="hint">PNG, JPG or WebP, up to 1 MB.</div>
+      <div class="msg" id="sellMsg" role="status" aria-live="polite"></div>
+      <div class="row"><button class="btn" id="sellGo">Submit for review</button></div>
+      <div class="safe">Every listing is reviewed before it goes live.</div>
+    </div>
+  </div>
+</dialog>
+
+<!-- My listings -->
+<dialog id="mineDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>My listings</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <div id="mineList"></div>
+  </div>
+</dialog>
+
+<!-- Get featured -->
+<dialog id="featDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Get featured</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <p class="hint" id="featFor"></p>
+    <div id="featList"></div>
+    <div class="msg" id="featMsg" role="status" aria-live="polite"></div>
+    <div class="safe">Each slot lasts 7 days. Once booked, nobody can replace you during that week.</div>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://lsbjpdblcdlrddnrzqax.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmpwZGJsY2RscmRkbnJ6cWF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzODM5MDEsImV4cCI6MjEwOTk1OTkwMX0.2XusRIKZCzFsXyTBZ6bQFOmYHbHGRoLq33xun3rCYiw";
+const SUPPORT_EMAIL = ""; // put your support email here, e.g. "support@yourdomain.com"
+const SLOT_PRICES = { 1: 20, 2: 15, 3: 10 }; // price per week for each rank
+const CURRENCY = "$"; // change to "₹" if you want rupees
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = (id) => document.getElementById(id);
+let all = [], featured = [], filterType = "all", query = "", user = null, authMode = "login";
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function safeUrl(u){
+  try { const x = new URL(u); return (x.protocol === "http:" || x.protocol === "https:") ? x.href : ""; }
+  catch { return ""; }
+}
+function money(n){ return CURRENCY + Number(n).toLocaleString("en-IN"); }
+function toast(t){
+  const d = document.createElement("div");
+  d.className = "toast"; d.textContent = t; document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3200);
+}
+
+function iconHtml(l){
+  const u = safeUrl(l.icon_url);
+  if (u) return `<img class="icon" src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+  return `<div class="icon" aria-hidden="true">${esc((l.title || "?").trim().charAt(0).toUpperCase())}</div>`;
+}
+function cardHtml(l, rank){
+  return `<button class="card" data-id="${esc(l.id)}">
+    ${rank ? '<div class="awning"></div>' : ""}
+    <div class="body">${iconHtml(l)}
+      <div class="info">
+        ${rank ? `<div class="rank">Rank ${esc(rank)}</div>` : ""}
+        <h3>${esc(l.title)}</h3>
+        <div class="meta">
+          <span class="price">${money(l.price)}</span>
+          <span>${l.type === "website" ? "Website" : "App"}</span>
+          ${l.verified ? '<span class="ok">Verified &#10003;</span>' : ""}
+        </div>
+      </div>
+    </div></button>`;
+}
+
+function render(){
+  const q = query.trim().toLowerCase();
+  const match = (l) => (filterType === "all" || l.type === filterType) &&
+    (!q || (l.title || "").toLowerCase().includes(q) || (l.category || "").toLowerCase().includes(q));
+
+  const feat = featured.filter(f => match(f.listing));
+  $("featWrap").hidden = feat.length === 0;
+  $("feat").innerHTML = feat.map(f => cardHtml(f.listing, f.rank)).join("");
+
+  const featIds = new Set(featured.map(f => f.listing.id));
+  const rest = all.filter(l => !featIds.has(l.id) && match(l));
+  $("list").innerHTML = rest.map(l => cardHtml(l)).join("");
+  $("empty").hidden = rest.length > 0 || feat.length > 0;
+}
+
+async function load(){
+  const now = new Date().toISOString();
+  const [a, s] = await Promise.all([
+    sb.from("listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
+    sb.from("slots").select("rank, listings(*)").lte("starts_at", now).gte("ends_at", now).order("rank")
+  ]);
+  if (a.error) { toast("Could not load listings. Check your internet and try again."); console.error(a.error); }
+  all = a.data || [];
+  featured = (s.data || [])
+    .filter(x => x.listings && x.listings.status === "approved")
+    .map(x => ({ rank: x.rank, listing: x.listings }));
+  render();
+}
+
+/* Filters */
+$("q").addEventListener("input", e => { query = e.target.value; render(); });
+$("chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  filterType = b.dataset.t;
+  document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", c === b ? "true" : "false"));
+  render();
+});
+
+/* Listing detail */
+function openDetail(id){
+  const l = [...all, ...featured.map(f => f.listing)].find(x => x.id === id);
+  if (!l) return;
+  const link = safeUrl(l.link);
+  $("det").innerHTML = `
+    <div class="dlg-head"><h2>${esc(l.title)}</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <div class="body" style="display:flex;gap:12px;align-items:center">${iconHtml(l)}
+      <div class="meta" style="margin:0">
+        <span class="price">${money(l.price)}</span>
+        <span>${l.type === "website" ? "Website" : "App"}</span>
+        ${l.category ? `<span>${esc(l.category)}</span>` : ""}
+        ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span>Not verified yet</span>'}
+      </div>
+    </div>
+    <p class="desc">${esc(l.description || "The seller has not added a description yet.")}</p>
+    <div class="row">
+      ${link ? `<a class="btn" href="${esc(link)}" target="_blank" rel="noopener noreferrer nofollow">Open link</a>` : ""}
+      <button class="btn ghost" id="reportBtn" data-id="${esc(l.id)}">Report</button>
+    </div>
+    <div class="safe">Verify ownership before you pay. For larger amounts, use a safe method such as Escrow.com.</div>`;
+  $("detDlg").showModal();
+}
+document.addEventListener("click", async e => {
+  const card = e.target.closest(".card");
+  if (card) return openDetail(card.dataset.id);
+  if (e.target.closest("[data-close]")) { e.target.closest("dialog").close(); return; }
+  const rb = e.target.closest("#reportBtn");
+  if (rb) {
+    if (!user) { $("detDlg").close(); openAuth("login", "Please log in to report a listing."); return; }
+    const reason = prompt("Why are you reporting this listing? (for example: fake listing, wrong link)");
+    if (!reason || !reason.trim()) return;
+    const { error } = await sb.from("reports").insert({ listing_id: rb.dataset.id, reporter_id: user.id, reason: reason.trim().slice(0, 500) });
+    toast(error ? "Could not send the report. Please try again." : "Report received. Thank you.");
+    if (!error) $("detDlg").close();
+  }
+});
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+
+/* Auth */
+function openAuth(mode, note){
+  setMode(mode);
+  $("authNote").textContent = note || ""; $("authNote").className = "msg";
+  $("authMsg").textContent = "";
+  $("authDlg").showModal();
+}
+function setMode(m){
+  authMode = m;
+  $("authTitle").textContent = m === "login" ? "Login" : "Sign up";
+  $("authGo").textContent = m === "login" ? "Login" : "Create account";
+  $("tabLogin").setAttribute("aria-pressed", m === "login");
+  $("tabSignup").setAttribute("aria-pressed", m === "signup");
+  $("pass").autocomplete = m === "login" ? "current-password" : "new-password";
+}
+$("tabLogin").onclick = () => setMode("login");
+$("tabSignup").onclick = () => setMode("signup");
+
+$("authGo").onclick = async () => {
+  const email = $("email").value.trim(), password = $("pass").value;
+  const m = $("authMsg"); m.className = "msg err";
+  if (!email || !password) { m.textContent = "Enter both email and password."; return; }
+  if (password.length < 6) { m.textContent = "Password must be at least 6 characters."; return; }
+  $("authGo").disabled = true; m.className = "msg"; m.textContent = "Please wait...";
+  let res;
+  if (authMode === "login") res = await sb.auth.signInWithPassword({ email, password });
+  else res = await sb.auth.signUp({ email, password });
+  $("authGo").disabled = false;
+  if (res.error) { m.className = "msg err"; m.textContent = res.error.message; return; }
+  if (authMode === "signup" && !res.data.session) {
+    m.className = "msg good"; m.textContent = "Account created. Check your email, tap the confirmation link, then log in.";
+    return;
+  }
+  $("authDlg").close(); $("pass").value = "";
+  toast("You are logged in.");
+};
+
+/* Sell and My listings */
+function supportHtml(){
+  return SUPPORT_EMAIL ? `<a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a>` : "AppHaat support";
+}
+async function openSell(){
+  if (!user) { openAuth("login", "Please log in to list an app or website."); return; }
+  const { data } = await sb.from("profiles").select("is_paid").eq("id", user.id).maybeSingle();
+  const paid = !!(data && data.is_paid);
+  $("sellLock").hidden = paid; $("sellForm").hidden = !paid;
+  if (!paid) $("sellLock").innerHTML = `Your account is not activated yet. Contact ${supportHtml()} to activate it, then you can list your app or website.`;
+  $("sellMsg").textContent = "";
+  $("sellDlg").showModal();
+}
+$("sellGo").onclick = async () => {
+  const m = $("sellMsg"); m.className = "msg err";
+  const title = $("sTitle").value.trim(), type = $("sType").value, link = safeUrl($("sLink").value.trim());
+  const priceRaw = $("sPrice").value, price = Number(priceRaw);
+  const category = $("sCat").value.trim(), description = $("sDesc").value.trim();
+  const file = $("sIcon").files[0];
+  if (!title) { m.textContent = "Enter a title."; return; }
+  if (!link) { m.textContent = "Enter a valid link that starts with https://"; return; }
+  if (priceRaw === "" || !isFinite(price) || price < 0) { m.textContent = "Enter a valid price."; return; }
+  if (!description) { m.textContent = "Add a short description."; return; }
+  const ext = file ? ({ "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" })[file.type] : null;
+  if (file && !ext) { m.textContent = "Icon must be a PNG, JPG or WebP image."; return; }
+  if (file && file.size > 1048576) { m.textContent = "Icon must be 1 MB or smaller."; return; }
+
+  $("sellGo").disabled = true; m.className = "msg"; m.textContent = "Submitting...";
+  let icon_url = null;
+  if (file) {
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const up = await sb.storage.from("icons").upload(path, file, { contentType: file.type, upsert: false });
+    if (up.error) { $("sellGo").disabled = false; m.className = "msg err"; m.textContent = "Could not upload the icon. Please try again."; console.error(up.error); return; }
+    icon_url = sb.storage.from("icons").getPublicUrl(path).data.publicUrl;
+  }
+  const { error } = await sb.from("listings").insert({ owner_id: user.id, title, type, link, price, category: category || null, description, icon_url });
+  $("sellGo").disabled = false;
+  if (error) { m.className = "msg err"; m.textContent = "Could not submit your listing. Please try again."; console.error(error); return; }
+  ["sTitle","sLink","sPrice","sCat","sDesc","sIcon"].forEach(id => $(id).value = "");
+  $("sellDlg").close();
+  toast("Listing submitted. It goes live after review.");
+  openMine();
+};
+
+const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden" };
+async function openMine(){
+  $("mineList").innerHTML = '<div class="empty">Loading...</div>';
+  $("mineDlg").showModal();
+  const { data, error } = await sb.from("listings")
+    .select("id,title,status,verified,verify_code,created_at")
+    .eq("owner_id", user.id).order("created_at", { ascending: false });
+  if (error) { $("mineList").innerHTML = '<div class="empty">Could not load your listings.</div>'; return; }
+  if (!data.length) { $("mineList").innerHTML = '<div class="empty">You have no listings yet.</div>'; return; }
+  $("mineList").innerHTML = data.map(l => `
+    <div class="mine">
+      <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
+      <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
+      ${l.verified ? "" : `<div class="safe">To get verified, add this code to your website (any page) or your app store description: <b>${esc(l.verify_code)}</b>. Then contact ${supportHtml()}.</div>`}
+      ${l.status === "approved" ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
+    </div>`).join("");
+}
+
+/* Get featured: rank slot requests */
+let featListingId = null;
+const fmtDate = (x) => new Date(x).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+async function openFeat(id, title){
+  featListingId = id;
+  $("featFor").textContent = "Listing: " + title;
+  $("featMsg").textContent = "";
+  $("featList").innerHTML = '<div class="empty">Loading...</div>';
+  $("featDlg").showModal();
+  const { data } = await sb.from("slots").select("rank,ends_at").gt("ends_at", new Date().toISOString());
+  const until = {};
+  (data || []).forEach(x => { if (!until[x.rank] || x.ends_at > until[x.rank]) until[x.rank] = x.ends_at; });
+  $("featList").innerHTML = [1, 2, 3].map(r => `
+    <div class="mine">
+      <div class="mrow"><strong>Rank ${r}</strong><span class="price">${money(SLOT_PRICES[r])} / week</span></div>
+      <div class="meta"><span>${until[r] ? "Booked until " + esc(fmtDate(until[r])) : "Available now"}</span></div>
+      <div class="row"><button class="btn small slotBtn" data-rank="${r}">${until[r] ? "Join waitlist" : "Request this slot"}</button></div>
+    </div>`).join("");
+}
+document.addEventListener("click", async e => {
+  const fb = e.target.closest(".featBtn");
+  if (fb) { $("mineDlg").close(); openFeat(fb.dataset.id, fb.dataset.title); return; }
+  const sbn = e.target.closest(".slotBtn");
+  if (!sbn) return;
+  const rank = Number(sbn.dataset.rank), m = $("featMsg");
+  sbn.disabled = true; m.className = "msg"; m.textContent = "Sending...";
+  const { error } = await sb.from("slot_requests").insert({ listing_id: featListingId, owner_id: user.id, rank });
+  sbn.disabled = false;
+  if (error) {
+    m.className = "msg err";
+    m.textContent = error.code === "23505" ? "You already have a pending request for this rank." : "Could not send your request. Please try again.";
+    return;
+  }
+  m.className = "msg good";
+  m.innerHTML = `Request sent for Rank ${rank}. Contact ${supportHtml()} to pay ${esc(money(SLOT_PRICES[rank]))}. Your slot starts after payment is confirmed.`;
+});
+
+function paintUser(){
+  if (user) {
+    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="mineBtn">My listings</button><button class="btn ghost small" id="logoutBtn">Logout</button>`;
+    $("mineBtn").onclick = openMine;
+    $("logoutBtn").onclick = async () => { await sb.auth.signOut(); toast("You are logged out."); };
+  } else {
+    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="loginBtn">Login</button>`;
+    $("loginBtn").onclick = () => openAuth("login");
+  }
+  $("sellBtn").onclick = openSell;
+}
+$("loginBtn").onclick = () => openAuth("login");
+$("sellBtn").onclick = openSell;
+sb.auth.onAuthStateChange((_ev, session) => { user = session ? session.user : null; paintUser(); });
+sb.auth.getSession().then(({ data }) => { user = data.session ? data.session.user : null; paintUser(); });
+
+load();
+</script>
+</body>
+</html>
