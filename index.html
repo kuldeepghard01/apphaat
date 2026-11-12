@@ -192,6 +192,8 @@
       <button class="chip" data-tab="requests" aria-pressed="false">Slot requests</button>
       <button class="chip" data-tab="slots" aria-pressed="false">Live slots</button>
       <button class="chip" data-tab="users" aria-pressed="false">Users</button>
+      <button class="chip" data-tab="payments" aria-pressed="false">Payments</button>
+      <button class="chip" data-tab="pay" aria-pressed="false">Pay methods</button>
       <button class="chip" data-tab="reports" aria-pressed="false">Reports</button>
       <button class="chip" data-tab="settings" aria-pressed="false">Settings</button>
     </div>
@@ -207,6 +209,19 @@
   </div>
 </dialog>
 
+<dialog id="payDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Pay AppHaat</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <p id="payFor"></p>
+    <div id="payList"></div>
+    <label for="payRef">After paying, enter your payment reference (UTR or transaction ID)</label>
+    <input class="f" id="payRef" type="text" maxlength="80">
+    <div class="msg" id="payMsg" role="status" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="payGo">I have paid</button></div>
+    <div class="safe">We confirm your payment by checking this reference, so it can take a little time.</div>
+  </div>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="home.js"></script>
@@ -214,7 +229,9 @@
 <script src="info.js"></script>
 <script src="verify.js"></script>
 <script src="sell.js"></script>
+<script src="pay.js"></script>
 <script src="admin.js"></script>
+<script src="admin-pay.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>

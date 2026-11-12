@@ -13,6 +13,8 @@ function moneyL(l, n){ // amounts of a listing, shown in the visitor's chosen cu
   const txt = v.toLocaleString(DISPLAY === "INR" ? "en-IN" : "en-US", { maximumFractionDigits: v < 100 ? 2 : 0 });
   return (from !== DISPLAY ? "\u2248 " : "") + (DISPLAY === "INR" ? "\u20B9" : "$") + txt;
 }
+let ONLINE_PAY = false; // automatic online payments (Razorpay), switched on in the admin panel
+let FREE_LIMIT = 100; // first N sign-ups get a free account, set from the admin panel
 let ACCOUNT_FEE = 5; // set from the admin panel (Settings)
 const CATEGORIES = ["Games", "Tools & Utilities", "Social", "Shopping & E-commerce", "Education", "Finance", "Entertainment", "Health & Fitness", "Travel", "Blog & Content", "SaaS & Business", "Other"];
 const CURRENCY = "$"; // change to "₹" if you want rupees
@@ -42,6 +44,8 @@ async function loadSettings(){
   const { data } = await sb.from("settings").select("key,value");
   (data || []).forEach(r => {
     if (r.key === "support_email") SUPPORT_EMAIL = r.value || "";
+    if (r.key === "online_pay") ONLINE_PAY = r.value === "on";
+    if (r.key === "free_limit") FREE_LIMIT = Number(r.value) || 0;
     if (r.key === "usd_inr" && Number(r.value) > 0) USD_INR = Number(r.value);
     if (r.key === "banner_text") BANNER.text = r.value || "";
     if (r.key === "banner_link") BANNER.link = r.value || "";

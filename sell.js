@@ -26,7 +26,7 @@ async function openSell(){
   const { data } = await sb.from("profiles").select("is_paid").eq("id", user.id).maybeSingle();
   const paid = !!(data && data.is_paid);
   $("sellLock").hidden = paid; $("sellForm").hidden = !paid;
-  if (!paid) $("sellLock").innerHTML = `Your account is not activated yet. ${ACCOUNT_FEE > 0 ? `The one-time account fee is ${esc(money(ACCOUNT_FEE))}. ` : ""}Contact ${supportHtml()} to pay and activate it, then you can list your app or website.`;
+  if (!paid) $("sellLock").innerHTML = `Your account is not activated yet. ${ACCOUNT_FEE > 0 ? `The one-time account fee is ${esc(money(ACCOUNT_FEE))}. ` : ""}Pay it below to activate your account, then you can list your app or website. Need help? Contact ${supportHtml()}.${ACCOUNT_FEE > 0 ? `<div class="row"><button class="btn small payBtn" data-purpose="account" data-amount="${esc(ACCOUNT_FEE)}">Pay ${esc(money(ACCOUNT_FEE))}</button></div>` : ""}`;
   $("sellMsg").textContent = "";
   $("sellDlg").showModal();
 }
@@ -124,7 +124,7 @@ document.addEventListener("click", async e => {
   if (!sbn) return;
   const rank = Number(sbn.dataset.rank), m = $("featMsg");
   sbn.disabled = true; m.className = "msg"; m.textContent = "Sending...";
-  const { error } = await sb.from("slot_requests").insert({ listing_id: featListingId, owner_id: user.id, rank });
+  const { data: made, error } = await sb.from("slot_requests").insert({ listing_id: featListingId, owner_id: user.id, rank }).select("id").single();
   sbn.disabled = false;
   if (error) {
     m.className = "msg err";
@@ -132,7 +132,7 @@ document.addEventListener("click", async e => {
     return;
   }
   m.className = "msg good";
-  m.innerHTML = `Request sent for Rank ${rank}. Contact ${supportHtml()} to pay ${esc(money(SLOT_PRICES[rank]))}. Your slot starts after payment is confirmed.`;
+  m.innerHTML = `Request sent for Rank ${rank}. Pay ${esc(money(SLOT_PRICES[rank]))} to start your spot. It starts after we confirm your payment. <div class="row"><button class="btn small payBtn" data-purpose="slot" data-amount="${esc(SLOT_PRICES[rank])}" data-ref="${esc(made.id)}">Pay now</button></div>`;
 });
 
 document.addEventListener("click", async e => {

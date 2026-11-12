@@ -175,6 +175,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();
