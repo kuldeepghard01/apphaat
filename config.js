@@ -31,7 +31,9 @@ function safeUrl(u){
 function money(n){ return CURRENCY + Number(n).toLocaleString("en-IN"); }
 function toast(t){
   const d = document.createElement("div");
-  d.className = "toast"; d.textContent = t; document.body.appendChild(d);
+  d.className = "toast"; d.textContent = t; d.setAttribute("popover", "manual"); d.setAttribute("role", "status");
+  document.body.appendChild(d);
+  try { d.showPopover(); } catch (e) {}
   setTimeout(() => d.remove(), 3200);
 }
 

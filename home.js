@@ -105,10 +105,11 @@ $("fCur").addEventListener("input", () => {
 async function renderPromo(){
   await settingsReady;
   const ends = {}; featured.forEach(f => { ends[f.rank] = f.ends; });
-  $("promo").innerHTML = Object.keys(SLOT_PRICES).map(Number).map(r => `
-    <div class="promo-card"><span class="tag">Spot ${r}</span>
-      <b>${esc(money(SLOT_PRICES[r]))}<small> / week</small></b>
-      <span class="hint">${ends[r] ? "Booked until " + esc(fmtDate(ends[r])) : "Available now"}</span></div>`).join("");
+  const short = (x) => new Date(x).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  $("promo").innerHTML = Object.keys(SLOT_PRICES).map(Number).filter(r => r <= 3).map(r => `
+    <button class="promo-card" data-info="spot" data-rank="${r}"><span class="tag">Spot ${r}</span>
+      <b>${esc(money(SLOT_PRICES[r]))}<small> /wk</small></b>
+      <span class="hint">${ends[r] ? "Till " + esc(short(ends[r])) : "Available"}</span></button>`).join("");
 }
 
 /* Listing detail */
@@ -124,7 +125,7 @@ function statsHtml(l){
     l.traffic != null && ["Monthly traffic", Number(l.traffic).toLocaleString("en-IN")],
     l.country && ["Country", l.country]
   ].filter(Boolean);
-  return `<div class="stats">${items.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div>`;
+  return `<div class="stats">${items.map(([k, v]) => `<button class="stat" ${k === "Category" ? `data-cat="${esc(v)}"` : `data-info="stat" data-key="${esc(k)}"`}><span>${esc(k)}</span><b>${esc(v)}</b></button>`).join("")}</div>`;
 }
 settingsReady.then(() => {
   const b = $("banner"), t = (BANNER.text || "").trim(), u = safeUrl(BANNER.link);
@@ -144,7 +145,7 @@ function openDetail(id){
         <span class="price">${moneyL(l, l.price)}</span>
         <span>${l.type === "website" ? "Website" : "App"}</span>
         ${l.category ? `<span>${esc(l.category)}</span>` : ""}
-        ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span>Not verified yet</span>'}
+        ${l.verified ? '<button class="linkbtn ok" data-info="verified">Verified &#10003;</button>' : '<button class="linkbtn warn" data-info="unverified">Not verified yet</button>'}
       </div>
     </div>
     ${statsHtml(l)}
@@ -174,6 +175,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();

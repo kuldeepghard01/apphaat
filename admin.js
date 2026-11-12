@@ -136,11 +136,12 @@ function adminSettings(){
     <input class="f" id="cBan" type="text" maxlength="120" value="${esc(BANNER.text)}">
     <label for="cBanLink">Banner link (optional)</label>
     <input class="f" id="cBanLink" type="url" placeholder="https://" value="${esc(BANNER.link)}">
-    <div class="row"><button class="btn" id="aSaveCfg">Save settings</button></div>`;
+    <div class="row"><button class="btn" id="aSaveCfg">Save settings</button></div>
+    <div class="msg" id="cMsg" role="status" aria-live="polite"></div>`;
 }
 document.addEventListener("click", async e => {
   if (!e.target.closest("#aSaveCfg") || !isAdmin) return;
-  const m = $("adminMsg"), fee = Number($("cFee").value);
+  const m = $("cMsg"), fee = Number($("cFee").value);
   const parts = $("cSlots").value.split(",").map(x => x.trim());
   if (!(Number($("cRate").value) > 0) || !isFinite(fee) || fee < 0 || $("cFee").value === "" || parts.length > 20 || parts.some(x => x === "" || !isFinite(Number(x)) || Number(x) < 0)) {
     m.className = "msg err"; m.textContent = "Check the numbers. Slot prices must be comma separated, up to 20 slots."; return;
@@ -150,7 +151,7 @@ document.addEventListener("click", async e => {
   const r = await sb.from("settings").upsert(rows).select("key");
   if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save. Make sure the latest SQL was run."; return; }
   await loadSettings();
-  m.className = "msg good"; m.textContent = "Settings saved.";
+  m.className = "msg good"; m.textContent = "Saved \u2713 Your settings are updated."; toast("Settings saved."); m.scrollIntoView({ block: "nearest" });
 });
 
 async function adminSlots(){

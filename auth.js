@@ -41,7 +41,7 @@ function paintUser(){
     $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="mineBtn">My listings</button>${isAdmin ? '<button class="btn ghost small" id="adminBtn">Admin</button>' : ""}<button class="btn ghost small" id="logoutBtn">Logout</button>`;
     $("mineBtn").onclick = openMine;
     if (isAdmin) $("adminBtn").onclick = openAdmin;
-    $("logoutBtn").onclick = async () => { await sb.auth.signOut(); toast("You are logged out."); };
+    $("logoutBtn").onclick = async () => { if (!confirm("Log out of AppHaat?")) return; await sb.auth.signOut(); toast("You are logged out."); };
   } else {
     $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="loginBtn">Login</button>`;
     $("loginBtn").onclick = () => openAuth("login");
