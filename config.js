@@ -4,6 +4,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let SUPPORT_EMAIL = ""; // set from the admin panel (Settings)
 let SLOT_PRICES = { 1: 20, 2: 15, 3: 10 }; // set from the admin panel (Settings)
 let BANNER = { text: "", link: "" }; // top banner, set from the admin panel (Settings)
+let USD_INR = 88; // rupees per dollar, set from the admin panel (Settings)
+let DISPLAY = "USD";
+try { if (localStorage.getItem("apphaat_cur") === "INR") DISPLAY = "INR"; } catch (e) {}
+function convert(n, from){ n = Number(n); if (from === DISPLAY) return n; return from === "USD" ? n * USD_INR : n / USD_INR; }
+function moneyL(l, n){ // amounts of a listing, shown in the visitor's chosen currency
+  const from = l.currency || "USD", v = convert(n, from);
+  const txt = v.toLocaleString(DISPLAY === "INR" ? "en-IN" : "en-US", { maximumFractionDigits: v < 100 ? 2 : 0 });
+  return (from !== DISPLAY ? "\u2248 " : "") + (DISPLAY === "INR" ? "\u20B9" : "$") + txt;
+}
 let ACCOUNT_FEE = 5; // set from the admin panel (Settings)
 const CATEGORIES = ["Games", "Tools & Utilities", "Social", "Shopping & E-commerce", "Education", "Finance", "Entertainment", "Health & Fitness", "Travel", "Blog & Content", "SaaS & Business", "Other"];
 const CURRENCY = "$"; // change to "₹" if you want rupees
@@ -31,6 +40,7 @@ async function loadSettings(){
   const { data } = await sb.from("settings").select("key,value");
   (data || []).forEach(r => {
     if (r.key === "support_email") SUPPORT_EMAIL = r.value || "";
+    if (r.key === "usd_inr" && Number(r.value) > 0) USD_INR = Number(r.value);
     if (r.key === "banner_text") BANNER.text = r.value || "";
     if (r.key === "banner_link") BANNER.link = r.value || "";
     if (r.key === "account_fee") ACCOUNT_FEE = Number(r.value) || 0;

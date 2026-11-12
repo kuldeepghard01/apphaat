@@ -72,7 +72,7 @@ async function adminListings(){
     ].join("");
     return `<div class="mine">
       <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
-      <div class="meta"><span class="price">${money(l.price)}</span><span>${l.type === "website" ? "Website" : "App"}</span>
+      <div class="meta"><span class="price">${moneyL(l, l.price)}</span><span>${l.type === "website" ? "Website" : "App"}</span>
         ${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified</span>"}
         <span>${esc(em[l.owner_id] || "unknown owner")}</span></div>
       <div class="meta">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer nofollow">Open link</a>` : ""}
@@ -130,6 +130,8 @@ function adminSettings(){
     <div class="hint">Separate with commas. Each number is one slot, so 20,15,10 means 3 slots and Rank 1 costs 20. Add more numbers to add more slots (up to 20).</div>
     <label for="cMail">Support email</label>
     <input class="f" id="cMail" type="email" value="${esc(SUPPORT_EMAIL)}">
+    <label for="cRate">Rupees per 1 US dollar (used for the INR/USD switch)</label>
+    <input class="f" id="cRate" type="number" min="0" step="any" value="${esc(USD_INR)}">
     <label for="cBan">Top banner message (an ad or announcement, leave empty to hide)</label>
     <input class="f" id="cBan" type="text" maxlength="120" value="${esc(BANNER.text)}">
     <label for="cBanLink">Banner link (optional)</label>
@@ -140,11 +142,11 @@ document.addEventListener("click", async e => {
   if (!e.target.closest("#aSaveCfg") || !isAdmin) return;
   const m = $("adminMsg"), fee = Number($("cFee").value);
   const parts = $("cSlots").value.split(",").map(x => x.trim());
-  if (!isFinite(fee) || fee < 0 || $("cFee").value === "" || parts.length > 20 || parts.some(x => x === "" || !isFinite(Number(x)) || Number(x) < 0)) {
+  if (!(Number($("cRate").value) > 0) || !isFinite(fee) || fee < 0 || $("cFee").value === "" || parts.length > 20 || parts.some(x => x === "" || !isFinite(Number(x)) || Number(x) < 0)) {
     m.className = "msg err"; m.textContent = "Check the numbers. Slot prices must be comma separated, up to 20 slots."; return;
   }
   m.className = "msg"; m.textContent = "Saving...";
-  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: $("cBanLink").value.trim() }];
+  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: $("cBanLink").value.trim() }];
   const r = await sb.from("settings").upsert(rows).select("key");
   if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save. Make sure the latest SQL was run."; return; }
   await loadSettings();

@@ -12,9 +12,9 @@ function cardHtml(l, rank, small){
         ${rank ? `<div class="rank">Sponsored &middot; Rank ${esc(rank)}</div>` : ""}
         <h3>${esc(l.title)}</h3>
         <div class="meta">
-          <span class="price">${money(l.price)}</span>
+          <span class="price">${moneyL(l, l.price)}</span>
           <span>${l.type === "website" ? "Website" : "App"}</span>
-          ${l.monthly_profit != null ? `<span>Profit ${money(l.monthly_profit)}/mo</span>` : ""}
+          ${l.monthly_profit != null ? `<span>Profit ${moneyL(l, l.monthly_profit)}/mo</span>` : ""}
           ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span class="warn">Unverified</span>'}
         </div>
       </div>
@@ -33,11 +33,12 @@ function similar(ref, n){
 }
 
 function render(){
+  $("fMin").placeholder = "Min price (" + DISPLAY + ")"; $("fMax").placeholder = "Max price (" + DISPLAY + ")";
   const q = query.trim().toLowerCase();
   const cat = $("fCat").value, minRaw = $("fMin").value, maxRaw = $("fMax").value;
   const min = minRaw === "" ? 0 : Number(minRaw), max = maxRaw === "" ? Infinity : Number(maxRaw);
   const match = (l) => (filterType === "all" || l.type === filterType) && (!cat || l.category === cat) && (!$("fVer").checked || l.verified) &&
-    Number(l.price) >= min && Number(l.price) <= max &&
+    convert(l.price, l.currency || "USD") >= min && convert(l.price, l.currency || "USD") <= max &&
     (!q || (l.title || "").toLowerCase().includes(q) || (l.category || "").toLowerCase().includes(q));
 
   const feat = featured.filter(f => match(f.listing));
@@ -47,8 +48,8 @@ function render(){
   const featIds = new Set(featured.map(f => f.listing.id));
   const rest = all.filter(l => !featIds.has(l.id) && match(l));
   const sort = $("fSort").value;
-  if (sort === "low") rest.sort((a, b) => a.price - b.price);
-  if (sort === "high") rest.sort((a, b) => b.price - a.price);
+  if (sort === "low") rest.sort((a, b) => convert(a.price, a.currency || "USD") - convert(b.price, b.currency || "USD"));
+  if (sort === "high") rest.sort((a, b) => convert(b.price, b.currency || "USD") - convert(a.price, a.currency || "USD"));
   $("list").innerHTML = rest.map(l => cardHtml(l, null, true)).join("");
 
   const none = rest.length === 0 && feat.length === 0;
@@ -64,14 +65,14 @@ async function load(){
   const now = new Date().toISOString();
   const [a, s] = await Promise.all([
     sb.from("listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
-    sb.from("slots").select("rank, listings(*)").lte("starts_at", now).gte("ends_at", now).order("rank")
+    sb.from("slots").select("rank, ends_at, listings(*)").lte("starts_at", now).gte("ends_at", now).order("rank")
   ]);
   if (a.error) { toast("Could not load listings. Check your internet and try again."); console.error(a.error); }
   all = a.data || [];
   featured = (s.data || [])
     .filter(x => x.listings && x.listings.status === "approved")
-    .map(x => ({ rank: x.rank, listing: x.listings }));
-  render();
+    .map(x => ({ rank: x.rank, listing: x.listings, ends: x.ends_at }));
+  render(); renderPromo();
 }
 
 /* Filters */
@@ -94,14 +95,30 @@ $("fClear").onclick = () => {
   render();
 };
 
+$("fCur").value = DISPLAY;
+$("fCur").addEventListener("input", () => {
+  DISPLAY = $("fCur").value;
+  try { localStorage.setItem("apphaat_cur", DISPLAY); } catch (e) {}
+  render(); renderPromo();
+});
+
+async function renderPromo(){
+  await settingsReady;
+  const ends = {}; featured.forEach(f => { ends[f.rank] = f.ends; });
+  $("promo").innerHTML = Object.keys(SLOT_PRICES).map(Number).map(r => `
+    <div class="promo-card"><span class="tag">Spot ${r}</span>
+      <b>${esc(money(SLOT_PRICES[r]))}<small> / week</small></b>
+      <span class="hint">${ends[r] ? "Booked until " + esc(fmtDate(ends[r])) : "Available now"}</span></div>`).join("");
+}
+
 /* Listing detail */
 function statsHtml(l){
   const mult = l.monthly_profit > 0 ? (Number(l.price) / (l.monthly_profit * 12)).toFixed(1) + "x" : "";
   const items = [
-    ["Asking price", money(l.price)], ["Type", l.type === "website" ? "Website" : "App"],
+    ["Asking price", moneyL(l, l.price)], ["Type", l.type === "website" ? "Website" : "App"],
     l.category && ["Category", l.category],
-    l.monthly_revenue != null && ["Monthly revenue", money(l.monthly_revenue)],
-    l.monthly_profit != null && ["Monthly profit", money(l.monthly_profit)],
+    l.monthly_revenue != null && ["Monthly revenue", moneyL(l, l.monthly_revenue)],
+    l.monthly_profit != null && ["Monthly profit", moneyL(l, l.monthly_profit)],
     mult && ["Profit multiple", mult],
     l.age_years != null && ["Age", l.age_years + (Number(l.age_years) === 1 ? " year" : " years")],
     l.traffic != null && ["Monthly traffic", Number(l.traffic).toLocaleString("en-IN")],
@@ -124,7 +141,7 @@ function openDetail(id){
     <div class="dlg-head"><h2>${esc(l.title)}</h2><button class="x" data-close aria-label="Close">&times;</button></div>
     <div class="body" style="display:flex;gap:12px;align-items:center">${iconHtml(l)}
       <div class="meta" style="margin:0">
-        <span class="price">${money(l.price)}</span>
+        <span class="price">${moneyL(l, l.price)}</span>
         <span>${l.type === "website" ? "Website" : "App"}</span>
         ${l.category ? `<span>${esc(l.category)}</span>` : ""}
         ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span>Not verified yet</span>'}

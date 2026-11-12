@@ -3,7 +3,24 @@
 function supportHtml(){
   return SUPPORT_EMAIL ? `<a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a>` : "AppHaat support";
 }
+let editingId = null, editingLink = null, mineCache = [];
+const FIELDS = ["sTitle", "sLink", "sPrice", "sCat", "sDesc", "sIcon", "sRev", "sProfit", "sAge", "sTraffic", "sCountry"];
+function clearForm(){ FIELDS.forEach(id => { $(id).value = ""; }); $("sType").value = "app"; $("sCur").value = "USD"; }
+function openEdit(l){
+  editingId = l.id; editingLink = l.link;
+  clearForm();
+  $("sTitle").value = l.title || ""; $("sType").value = l.type; $("sLink").value = l.link || "";
+  $("sPrice").value = l.price; $("sCur").value = l.currency || "USD"; $("sCat").value = l.category || "";
+  $("sDesc").value = l.description || "";
+  $("sRev").value = l.monthly_revenue ?? ""; $("sProfit").value = l.monthly_profit ?? "";
+  $("sAge").value = l.age_years ?? ""; $("sTraffic").value = l.traffic ?? ""; $("sCountry").value = l.country || "";
+  $("sellHead").textContent = "Edit your listing"; $("sellGo").textContent = "Save changes";
+  $("sellLock").hidden = true; $("sellForm").hidden = false; $("sellMsg").textContent = "";
+  $("sellDlg").showModal();
+}
 async function openSell(){
+  editingId = null; clearForm();
+  $("sellHead").textContent = "List your app or website"; $("sellGo").textContent = "Submit for review";
   if (!user) { openAuth("login", "Please log in to list an app or website."); return; }
   await settingsReady;
   const { data } = await sb.from("profiles").select("is_paid").eq("id", user.id).maybeSingle();
@@ -31,7 +48,7 @@ $("sellGo").onclick = async () => {
   if (file && !ext) { m.textContent = "Icon must be a PNG, JPG or WebP image."; return; }
   if (file && file.size > 1048576) { m.textContent = "Icon must be 1 MB or smaller."; return; }
 
-  $("sellGo").disabled = true; m.className = "msg"; m.textContent = "Submitting...";
+  $("sellGo").disabled = true; m.className = "msg"; m.textContent = "Saving...";
   let icon_url = null;
   if (file) {
     const path = `${user.id}/${Date.now()}.${ext}`;
@@ -39,23 +56,32 @@ $("sellGo").onclick = async () => {
     if (up.error) { $("sellGo").disabled = false; m.className = "msg err"; m.textContent = "Could not upload the icon. Please try again."; console.error(up.error); return; }
     icon_url = sb.storage.from("icons").getPublicUrl(path).data.publicUrl;
   }
-  const { error } = await sb.from("listings").insert({ owner_id: user.id, title, type, link, price, category: category || null, description, icon_url, ...extra });
+  const payload = { title, type, link, price, currency: $("sCur").value, category: category || null, description, ...extra };
+  if (icon_url) payload.icon_url = icon_url;
+  let error;
+  if (editingId) {
+    const r = await sb.from("listings").update(payload).eq("id", editingId).select("id");
+    error = r.error || (!r.data || !r.data.length ? { message: "not saved" } : null);
+  } else {
+    ({ error } = await sb.from("listings").insert({ owner_id: user.id, ...payload }));
+  }
   $("sellGo").disabled = false;
-  if (error) { m.className = "msg err"; m.textContent = "Could not submit your listing. Please try again."; console.error(error); return; }
-  ["sTitle","sLink","sPrice","sCat","sDesc","sIcon","sRev","sProfit","sAge","sTraffic","sCountry"].forEach(id => $(id).value = "");
-  $("sellDlg").close();
-  toast("Listing submitted. It goes live after review.");
-  openMine();
+  if (error) { m.className = "msg err"; m.textContent = "Could not save your listing. Please try again."; console.error(error); return; }
+  const relink = editingId && link !== editingLink, wasEdit = !!editingId;
+  editingId = null; clearForm(); $("sellDlg").close();
+  toast(wasEdit ? (relink ? "Saved. The link changed, so it needs review and verification again." : "Changes saved.") : "Listing submitted. It goes live after review.");
+  load(); openMine();
 };
 
 const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden" };
 async function openMine(){
   $("mineList").innerHTML = '<div class="empty">Loading...</div>';
-  $("mineDlg").showModal();
+  if (!$("mineDlg").open) $("mineDlg").showModal();
   const { data, error } = await sb.from("listings")
-    .select("id,title,status,verified,verify_code,created_at")
+    .select("*")
     .eq("owner_id", user.id).order("created_at", { ascending: false });
   if (error) { $("mineList").innerHTML = '<div class="empty">Could not load your listings.</div>'; return; }
+  mineCache = data;
   if (!data.length) { $("mineList").innerHTML = '<div class="empty">You have no listings yet.</div>'; return; }
   const inq = await sb.from("inquiries").select("listing_id,buyer_email,message,offer,created_at")
     .in("listing_id", data.map(l => l.id)).order("created_at", { ascending: false });
@@ -64,6 +90,7 @@ async function openMine(){
     <div class="mine">
       <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
       <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
+      <div class="row"><button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
       ${l.verified ? "" : `<div class="safe">To get verified, put this code on your website inside the head tag as <b>&lt;meta name="apphaat-verify" content="${esc(l.verify_code)}"&gt;</b>, or in your app store description. Then contact ${supportHtml()}. Only verified listings can be featured.</div><div class="row"><button class="btn small verBtn" data-id="${esc(l.id)}">Verify now</button></div>`}
       ${l.status === "approved" && l.verified ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
       ${inboxHtml(by[l.id] || [], l.title)}
@@ -108,7 +135,19 @@ document.addEventListener("click", async e => {
   m.innerHTML = `Request sent for Rank ${rank}. Contact ${supportHtml()} to pay ${esc(money(SLOT_PRICES[rank]))}. Your slot starts after payment is confirmed.`;
 });
 
+document.addEventListener("click", async e => {
+  const eb = e.target.closest(".editBtn"), db = e.target.closest(".delBtn");
+  if (eb) { const l = mineCache.find(x => x.id === eb.dataset.id); if (l) { $("mineDlg").close(); openEdit(l); } return; }
+  if (!db) return;
+  if (!confirm("Delete this listing permanently? Any featured slot on it will be lost too.")) return;
+  db.disabled = true;
+  const r = await sb.from("listings").delete().eq("id", db.dataset.id).select("id");
+  if (r.error || !r.data || !r.data.length) { toast("Could not delete the listing."); db.disabled = false; return; }
+  toast("Listing deleted."); load(); openMine();
+});
+
 /* Hero and footer shortcuts */
+$("promoBtn").onclick = () => { if (user) openMine(); else openAuth("login", "Log in to book a spot."); };
 $("heroSell").onclick = openSell;
 $("footSell").onclick = (e) => { e.preventDefault(); openSell(); };
 $("footAd").onclick = (e) => { e.preventDefault(); if (user) openMine(); else openAuth("login", "Log in to promote your listing."); };
