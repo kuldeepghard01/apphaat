@@ -4,7 +4,7 @@ function supportHtml(){
   return SUPPORT_EMAIL ? `<a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a>` : "AppHaat support";
 }
 let editingId = null, editingLink = null, mineCache = [];
-const FIELDS = ["sTitle", "sLink", "sPrice", "sCat", "sDesc", "sIcon", "sRev", "sProfit", "sAge", "sTraffic", "sCountry"];
+const FIELDS = ["sTitle", "sLink", "sPrice", "sCat", "sDesc", "sIcon", "sRev", "sProfit", "sAge", "sTraffic", "sCountry", "sShots"];
 function clearForm(){ FIELDS.forEach(id => { $(id).value = ""; }); $("sType").value = "app"; $("sCur").value = "USD"; }
 function openEdit(l){
   editingId = l.id; editingLink = l.link;
@@ -47,6 +47,10 @@ $("sellGo").onclick = async () => {
   const ext = file ? ({ "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" })[file.type] : null;
   if (file && !ext) { m.textContent = "Icon must be a PNG, JPG or WebP image."; return; }
   if (file && file.size > 1048576) { m.textContent = "Icon must be 1 MB or smaller."; return; }
+  const IMG_EXT = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+  const shotFiles = [...$("sShots").files];
+  if (shotFiles.length > 5) { m.textContent = "Choose up to 5 screenshots."; return; }
+  if (shotFiles.some(f => !IMG_EXT[f.type] || f.size > 3145728)) { m.textContent = "Screenshots must be PNG, JPG or WebP, up to 3 MB each."; return; }
 
   $("sellGo").disabled = true; m.className = "msg"; m.textContent = "Saving...";
   let icon_url = null;
@@ -58,6 +62,16 @@ $("sellGo").onclick = async () => {
   }
   const payload = { title, type, link, price, currency: $("sCur").value, category: category || null, description, ...extra };
   if (icon_url) payload.icon_url = icon_url;
+  if (shotFiles.length) {
+    const urls = [];
+    for (let i = 0; i < shotFiles.length; i++) {
+      const f = shotFiles[i], sp = `${user.id}/shot-${Date.now()}-${i}.${IMG_EXT[f.type]}`;
+      const su = await sb.storage.from("icons").upload(sp, f, { contentType: f.type, upsert: false });
+      if (su.error) { $("sellGo").disabled = false; m.className = "msg err"; m.textContent = "Could not upload a screenshot. Please try again."; return; }
+      urls.push(sb.storage.from("icons").getPublicUrl(sp).data.publicUrl);
+    }
+    payload.screenshots = urls;
+  }
   let error;
   if (editingId) {
     const r = await sb.from("listings").update(payload).eq("id", editingId).select("id");
@@ -86,11 +100,17 @@ async function openMine(){
   const inq = await sb.from("inquiries").select("listing_id,buyer_email,message,offer,created_at")
     .in("listing_id", data.map(l => l.id)).order("created_at", { ascending: false });
   const by = {}; (inq.data || []).forEach(x => { (by[x.listing_id] = by[x.listing_id] || []).push(x); });
+  const ids = data.map(l => l.id);
+  const stR = await sb.from("listing_stats").select("*").in("listing_id", ids);
+  const st = {}; (stR.data || []).forEach(x => { st[x.listing_id] = x; });
+  const chR = await sb.from("chat_messages").select("listing_id,buyer_id").in("listing_id", ids);
+  const ch = {}; (chR.data || []).forEach(x => { (ch[x.listing_id] = ch[x.listing_id] || new Set()).add(x.buyer_id); });
   $("mineList").innerHTML = data.map(l => `
     <div class="mine">
       <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
       <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
-      <div class="row"><button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
+      <div class="meta"><span>${(st[l.id] || {}).views || 0} views</span><span>${(st[l.id] || {}).views_7d || 0} in 7 days</span><span>${(ch[l.id] || new Set()).size} chats</span></div>
+      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
       ${l.verified ? "" : `<div class="safe">To get verified, put this code on your website inside the head tag as <b>&lt;meta name="apphaat-verify" content="${esc(l.verify_code)}"&gt;</b>, or in your app store description. Then contact ${supportHtml()}. Only verified listings can be featured.</div><div class="row"><button class="btn small verBtn" data-id="${esc(l.id)}">Verify now</button></div>`}
       ${l.status === "approved" && l.verified ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
       ${inboxHtml(by[l.id] || [], l.title)}
@@ -133,6 +153,7 @@ document.addEventListener("click", async e => {
   }
   m.className = "msg good";
   m.innerHTML = `Request sent for Rank ${rank}. Pay ${esc(money(SLOT_PRICES[rank]))} to start your spot. It starts after we confirm your payment. <div class="row"><button class="btn small payBtn" data-purpose="slot" data-amount="${esc(SLOT_PRICES[rank])}" data-ref="${esc(made.id)}">Pay now</button></div>`;
+  openPay("slot", SLOT_PRICES[rank], made.id);
 });
 
 document.addEventListener("click", async e => {

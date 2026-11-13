@@ -113,6 +113,10 @@ async function renderPromo(){
 }
 
 /* Listing detail */
+function shotsHtml(l){
+  const list = (l.screenshots || []).map(safeUrl).filter(Boolean);
+  return list.length ? `<div class="shots">${list.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" alt="Screenshot" loading="lazy"></a>`).join("")}</div>` : "";
+}
 function statsHtml(l){
   const mult = l.monthly_profit > 0 ? (Number(l.price) / (l.monthly_profit * 12)).toFixed(1) + "x" : "";
   const items = [
@@ -148,11 +152,14 @@ function openDetail(id){
         ${l.verified ? '<button class="linkbtn ok" data-info="verified">Verified &#10003;</button>' : '<button class="linkbtn warn" data-info="unverified">Not verified yet</button>'}
       </div>
     </div>
+    ${shotsHtml(l)}
+    <div class="hint">Seller: <button class="linkbtn" id="sellerLink" data-seller="${esc(l.owner_id)}">Seller profile</button> &middot; <span id="viewCnt"></span></div>
     ${statsHtml(l)}
     <h3 style="font-size:18px;margin:14px 0 2px">About this listing</h3>
     <p class="desc" style="margin-top:6px">${esc(l.description || "The seller has not added a description yet.")}</p>
     <div class="row">
       <button class="btn" id="contactBtn" data-id="${esc(l.id)}">Contact seller</button>
+      <button class="btn ghost" id="saveBtn" data-id="${esc(l.id)}" data-on="0">&#9825; Save</button>
       ${link ? `<a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener noreferrer nofollow">Open link</a>` : ""}
       <button class="btn ghost" id="reportBtn" data-id="${esc(l.id)}">Report</button>
     </div>
@@ -160,6 +167,10 @@ function openDetail(id){
     ${sim.length ? `<h3 class="sec-title" style="font-size:18px">Similar listings</h3><div class="grid compact">${sim.map(x => cardHtml(x, null, true)).join("")}</div>` : ""}`;
   if (!$("detDlg").open) $("detDlg").showModal();
   $("detDlg").scrollTop = 0;
+  recordView(l);
+  paintSave(l);
+  sb.from("listing_stats").select("views").eq("listing_id", l.id).maybeSingle().then(r => { const v = $("viewCnt"); if (v) v.textContent = (r.data ? r.data.views : 0) + " views"; });
+  sb.from("public_profiles").select("display_name").eq("id", l.owner_id).maybeSingle().then(r => { const a = $("sellerLink"); if (a && r.data && r.data.display_name) a.textContent = r.data.display_name; });
 }
 document.addEventListener("click", async e => {
   const card = e.target.closest(".card");
@@ -175,6 +186,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();

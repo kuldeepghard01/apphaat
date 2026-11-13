@@ -21,12 +21,14 @@ $("contactGo").onclick = async () => {
   const offer = offerRaw === "" ? null : Number(offerRaw);
   if (offer !== null && (!isFinite(offer) || offer < 0)) { m.textContent = "Enter a valid offer."; return; }
   $("contactGo").disabled = true; m.className = "msg"; m.textContent = "Sending...";
-  const { error } = await sb.from("inquiries").insert({ listing_id: contactFor.id, buyer_id: user.id, message: msg, offer });
+  const body = (msg + (offer !== null ? `\n\nMy offer: ${contactFor.currency || "USD"} ${offer}` : "")).slice(0, 1000);
+  const { error } = await sb.from("chat_messages").insert({ listing_id: contactFor.id, buyer_id: user.id, sender_id: user.id, body });
   $("contactGo").disabled = false;
   if (error) { m.className = "msg err"; m.textContent = "Could not send your message. Please try again."; console.error(error); return; }
   $("kMsg").value = ""; $("kOffer").value = "";
   $("contactDlg").close(); $("detDlg").close();
-  toast("Message sent. The seller will reply by email.");
+  toast("Message sent. Replies appear in your Inbox.");
+  openThread(contactFor.id, user.id, contactFor.title, "the seller");
 };
 
 /* Shown to the seller under each of their listings (see My listings) */

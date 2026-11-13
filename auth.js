@@ -37,17 +37,19 @@ $("authGo").onclick = async () => {
 };
 
 function paintUser(){
+  $("avatarBtn").hidden = !user;
   if (user) {
-    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="mineBtn">My listings</button>${isAdmin ? '<button class="btn ghost small" id="adminBtn">Admin</button>' : ""}<button class="btn ghost small" id="logoutBtn">Logout</button>`;
-    $("mineBtn").onclick = openMine;
-    if (isAdmin) $("adminBtn").onclick = openAdmin;
-    $("logoutBtn").onclick = async () => { if (!confirm("Log out of AppHaat?")) return; await sb.auth.signOut(); toast("You are logged out."); };
+    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small bell" id="bellBtn" aria-label="Notifications"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><span class="dot" id="bellDot" hidden></span></button>`;
+    $("bellBtn").onclick = openNotifs;
+    startNotifs();
   } else {
     $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="loginBtn">Login</button>`;
     $("loginBtn").onclick = () => openAuth("login");
+    stopNotifs();
   }
   $("sellBtn").onclick = openSell;
 }
+$("avatarBtn").onclick = openProfile;
 $("loginBtn").onclick = () => openAuth("login");
 $("sellBtn").onclick = openSell;
 sb.auth.onAuthStateChange((_ev, session) => { user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); });
