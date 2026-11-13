@@ -7,17 +7,24 @@ function timeAgo(x){
   if (s < 86400) return Math.floor(s / 3600) + " h ago";
   return Math.floor(s / 86400) + " d ago";
 }
-function startNotifs(){ stopNotifs(); checkNotifs(); notifTimer = setInterval(checkNotifs, 45000); }
-function stopNotifs(){ if (notifTimer) clearInterval(notifTimer); notifTimer = null; }
+function startNotifs(){ stopNotifs(); checkNotifs(); subscribeNotices(); notifTimer = setInterval(checkNotifs, 60000); }
+function stopNotifs(){
+  if (notifTimer) clearInterval(notifTimer);
+  notifTimer = null;
+  if (noticeChannel) { sb.removeChannel(noticeChannel); noticeChannel = null; }
+  document.title = BASE_TITLE;
+}
 async function checkNotifs(){
   if (!user || !$("bellDot")) return;
   const { count } = await sb.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
   const d = $("bellDot"); d.hidden = !count; d.textContent = count > 99 ? "99+" : String(count || 0);
+  document.title = (count ? "(" + count + ") " : "") + BASE_TITLE;
 }
 async function openNotifs(){
   if (!user) { openAuth("login"); return; }
   $("notifList").innerHTML = '<div class="empty">Loading...</div>';
   if (!$("notifDlg").open) $("notifDlg").showModal();
+  paintPrefs();
   const { data, error } = await sb.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
   if (error || !data.length) { $("notifList").innerHTML = '<div class="empty">No notifications yet.</div>'; return; }
   $("notifList").innerHTML = data.map(n => `<div class="mine notif ${n.read ? "" : "unread"}" role="button" tabindex="0" data-nid="${esc(n.id)}" data-kind="${esc(n.kind)}" data-lid="${esc(n.listing_id || "")}">
@@ -33,9 +40,10 @@ document.addEventListener("click", async e => {
   if (el.classList.contains("unread")) { sb.from("notifications").update({ read: true }).eq("id", el.dataset.nid).then(checkNotifs); }
   $("notifDlg").close();
   const k = el.dataset.kind, lid = el.dataset.lid;
-  if (k === "message") openInbox();
+  if (k === "message" || k === "contact") openInbox();
   else if (["review", "report", "slotreq", "paymentreq", "user"].includes(k) && isAdmin) openAdmin();
-  else if (k === "view" || k === "listing" || k === "slot") openMine();
+  else if (k === "view" || k === "interest") openDashboard();
+  else if (k === "listing" || k === "slot") openMine();
   else if (lid && findListing(lid)) openDetail(lid);
 });
 
@@ -49,3 +57,43 @@ async function recordView(l){
   try { sessionStorage.setItem("apphaat_seen", JSON.stringify(seen)); } catch (e) {}
   await sb.from("listing_views").insert({ listing_id: l.id, viewer_id: user ? user.id : null });
 }
+
+/* Instant alerts: the server pushes each new notification to the open site */
+let noticeChannel = null;
+const BASE_TITLE = document.title;
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+function subscribeNotices(){
+  if (noticeChannel || !user) return;
+  noticeChannel = sb.channel("notices-" + user.id)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: "user_id=eq." + user.id }, p => onNotice(p.new))
+    .subscribe();
+}
+function onNotice(n){
+  checkNotifs();
+  if ($("notifDlg").open) openNotifs();
+  if (document.hidden && "Notification" in window && Notification.permission === "granted" && navigator.serviceWorker) {
+    navigator.serviceWorker.ready.then(reg => reg.showNotification(n.title, { body: n.body || "", tag: n.id })).catch(() => {});
+  } else {
+    toast(n.body ? n.title + ": " + n.body : n.title);
+  }
+}
+
+async function paintPrefs(){
+  const { data } = await sb.from("profiles").select("notify_views").eq("id", user.id).maybeSingle();
+  const on = !data || data.notify_views !== false;
+  const perm = ("Notification" in window && "serviceWorker" in navigator) ? Notification.permission : "unsupported";
+  $("notifPrefs").innerHTML =
+    (perm === "default" ? '<button class="btn small" id="alertOn">Turn on alerts on this device</button>'
+      : perm === "granted" ? '<div class="hint ok">Alerts are on for this device.</div>'
+      : perm === "denied" ? '<div class="hint">Alerts are blocked. Allow notifications for this site in your browser settings.</div>' : "") +
+    `<label class="chk" style="margin-top:8px"><input type="checkbox" id="prefViews" ${on ? "checked" : ""}> Notify me when someone views my listing</label>`;
+}
+document.addEventListener("click", async e => {
+  if (e.target.closest("#alertOn")) { await Notification.requestPermission(); paintPrefs(); }
+});
+document.addEventListener("change", async e => {
+  if (e.target.id !== "prefViews") return;
+  const r = await sb.from("profiles").update({ notify_views: e.target.checked }).eq("id", user.id);
+  toast(r.error ? "Could not save this setting." : "Saved.");
+});
