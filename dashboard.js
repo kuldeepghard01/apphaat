@@ -1,4 +1,4 @@
-/* AppHaat: seller dashboard (views, contacts, saves, interest) and the Save button */
+/* AppHaat: seller dashboard (views, contacts, saves, interest) */
 let dashDays = 30;
 const PERIODS = [[7, "7 days"], [30, "30 days"], [0, "All time"]];
 
@@ -38,33 +38,10 @@ async function openDashboard(){
       <div class="row"><button class="btn small anaOpen" data-id="${esc(r.listing_id)}">Analytics</button><button class="btn small ghost viewBtn" data-id="${esc(r.listing_id)}">View listing</button><button class="btn small ghost" data-dash-inbox>Messages</button></div></div>`).join("")}`;
 }
 
-/* Save button on a listing */
-const setSave = (b, on) => { b.dataset.on = on ? "1" : "0"; b.innerHTML = on ? "&#9829; Saved" : "&#9825; Save"; };
-async function paintSave(l){
-  const b = $("saveBtn");
-  if (!b) return;
-  if (user && l.owner_id === user.id) { b.hidden = true; return; }
-  if (!user) return;
-  const { data } = await sb.from("favorites").select("listing_id").eq("listing_id", l.id).maybeSingle();
-  setSave(b, !!data);
-}
-
-document.addEventListener("click", async e => {
+document.addEventListener("click", e => {
   const t = e.target;
   if (t.closest("#pgoDash")) { $("profDlg").close(); openDashboard(); return; }
   if (t.closest("[data-dash-inbox]")) { $("dashDlg").close(); openInbox(); return; }
   const dc = t.closest(".dchip");
-  if (dc) { dashDays = Number(dc.dataset.days); openDashboard(); return; }
-  const b = t.closest("#saveBtn");
-  if (!b) return;
-  if (!user) { $("detDlg").close(); openAuth("login", "Log in to save listings."); return; }
-  const on = b.dataset.on === "1";
-  b.disabled = true;
-  const { error } = on
-    ? await sb.from("favorites").delete().eq("listing_id", b.dataset.id).eq("user_id", user.id)
-    : await sb.from("favorites").insert({ user_id: user.id, listing_id: b.dataset.id });
-  b.disabled = false;
-  if (error) { toast("Could not update. Please try again."); return; }
-  setSave(b, !on);
-  toast(on ? "Removed from saved." : "Saved.");
+  if (dc) { dashDays = Number(dc.dataset.days); openDashboard(); }
 });

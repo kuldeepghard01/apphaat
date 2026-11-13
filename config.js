@@ -13,6 +13,7 @@ function moneyL(l, n){ // amounts of a listing, shown in the visitor's chosen cu
   const txt = v.toLocaleString(DISPLAY === "INR" ? "en-IN" : "en-US", { maximumFractionDigits: v < 100 ? 2 : 0 });
   return (from !== DISPLAY ? "\u2248 " : "") + (DISPLAY === "INR" ? "\u20B9" : "$") + txt;
 }
+let savedIds = new Set(); // ids of listings the visitor saved to the wishlist
 let ONLINE_PAY = false; // automatic online payments (Razorpay), switched on in the admin panel
 let FREE_LIMIT = 100; // first N sign-ups get a free account, set from the admin panel
 let ACCOUNT_FEE = 5; // set from the admin panel (Settings)

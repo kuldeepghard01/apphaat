@@ -39,13 +39,14 @@ $("authGo").onclick = async () => {
 function paintUser(){
   $("avatarBtn").hidden = !user;
   if (user) {
-    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small bell" id="bellBtn" aria-label="Notifications"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><span class="dot" id="bellDot" hidden></span></button>`;
+    $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="wishBtn" aria-label="Wishlist"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button><button class="btn ghost small bell" id="bellBtn" aria-label="Notifications"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><span class="dot" id="bellDot" hidden></span></button>`;
     $("bellBtn").onclick = openNotifs;
-    startNotifs();
+    $("wishBtn").onclick = openWishlist;
+    startNotifs(); loadSaved();
   } else {
     $("who").innerHTML = `<button class="btn small" id="sellBtn">Sell</button><button class="btn ghost small" id="loginBtn">Login</button>`;
     $("loginBtn").onclick = () => openAuth("login");
-    stopNotifs();
+    stopNotifs(); loadSaved();
   }
   $("sellBtn").onclick = openSell;
 }

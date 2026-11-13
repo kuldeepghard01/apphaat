@@ -7,6 +7,7 @@ function iconHtml(l){
 function cardHtml(l, rank, small){
   return `<button class="card${small ? " sm" : ""}" data-id="${esc(l.id)}">
     ${rank ? '<div class="awning"></div>' : ""}
+    ${savedIds.has(l.id) ? '<span class="heart" aria-label="Saved">&#9829;</span>' : ""}
     <div class="body">${iconHtml(l)}
       <div class="info">
         ${rank ? `<div class="rank">Sponsored &middot; Rank ${esc(rank)}</div>` : ""}
@@ -187,6 +188,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg", "anaDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg", "anaDlg", "wishDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();

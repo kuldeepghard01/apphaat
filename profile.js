@@ -28,7 +28,7 @@ async function openProfile(){
     <label for="pName">Display name</label><input class="f" id="pName" maxlength="40" value="${esc(me.display_name || "")}">
     <label for="pBio">About you</label><textarea class="f" id="pBio" maxlength="300">${esc(me.bio || "")}</textarea>
     <div class="row"><button class="btn" id="pSave">Save profile</button></div>
-    <div class="row"><button class="btn small" id="pgoDash">Seller dashboard</button><button class="btn ghost small" id="pgoMine">My listings</button><button class="btn ghost small" id="pgoInbox">Inbox</button><button class="btn ghost small" id="pgoNotif">Notifications</button>${isAdmin ? '<button class="btn ghost small" id="pgoAdmin">Admin</button>' : ""}<button class="btn ghost small" id="pgoOut">Logout</button></div>`;
+    <div class="row"><button class="btn small" id="pgoDash">Seller dashboard</button><button class="btn ghost small" id="pgoWish">Wishlist</button><button class="btn ghost small" id="pgoMine">My listings</button><button class="btn ghost small" id="pgoInbox">Inbox</button><button class="btn ghost small" id="pgoNotif">Notifications</button>${isAdmin ? '<button class="btn ghost small" id="pgoAdmin">Admin</button>' : ""}<button class="btn ghost small" id="pgoOut">Logout</button></div>`;
 }
 
 async function openSeller(id){

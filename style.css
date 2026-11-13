@@ -161,3 +161,6 @@ dialog.wide{width:min(96vw,720px)}
 .ana-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
 .ana-table th,.ana-table td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
 .ana-table th{color:var(--muted);font-weight:500;font-size:12px}
+.card{position:relative}
+.heart{position:absolute;top:8px;right:10px;color:var(--red);font-size:16px;line-height:1}
+.wish-item{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
