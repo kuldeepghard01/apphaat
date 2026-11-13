@@ -72,7 +72,7 @@ function subscribeNotices(){
 function onNotice(n){
   checkNotifs();
   if ($("notifDlg").open) openNotifs();
-  if (document.hidden && "Notification" in window && Notification.permission === "granted" && navigator.serviceWorker) {
+  if (document.hidden && !pushActive && "Notification" in window && Notification.permission === "granted" && navigator.serviceWorker) {
     navigator.serviceWorker.ready.then(reg => reg.showNotification(n.title, { body: n.body || "", tag: n.id })).catch(() => {});
   } else {
     toast(n.body ? n.title + ": " + n.body : n.title);
@@ -80,18 +80,10 @@ function onNotice(n){
 }
 
 async function paintPrefs(){
-  const { data } = await sb.from("profiles").select("notify_views").eq("id", user.id).maybeSingle();
-  const on = !data || data.notify_views !== false;
-  const perm = ("Notification" in window && "serviceWorker" in navigator) ? Notification.permission : "unsupported";
-  $("notifPrefs").innerHTML =
-    (perm === "default" ? '<button class="btn small" id="alertOn">Turn on alerts on this device</button>'
-      : perm === "granted" ? '<div class="hint ok">Alerts are on for this device.</div>'
-      : perm === "denied" ? '<div class="hint">Alerts are blocked. Allow notifications for this site in your browser settings.</div>' : "") +
-    `<label class="chk" style="margin-top:8px"><input type="checkbox" id="prefViews" ${on ? "checked" : ""}> Notify me when someone views my listing</label>`;
+  const [r, ph] = await Promise.all([sb.from("profiles").select("notify_views").eq("id", user.id).maybeSingle(), pushPrefsHtml()]);
+  const on = !r.data || r.data.notify_views !== false;
+  $("notifPrefs").innerHTML = ph + `<label class="chk" style="margin-top:8px"><input type="checkbox" id="prefViews" ${on ? "checked" : ""}> Notify me when someone views my listing</label>`;
 }
-document.addEventListener("click", async e => {
-  if (e.target.closest("#alertOn")) { await Notification.requestPermission(); paintPrefs(); }
-});
 document.addEventListener("change", async e => {
   if (e.target.id !== "prefViews") return;
   const r = await sb.from("profiles").update({ notify_views: e.target.checked }).eq("id", user.id);

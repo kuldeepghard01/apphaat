@@ -56,6 +56,7 @@ document.addEventListener("click", async e => {
   if (t.closest("#pgoAdmin")) { $("profDlg").close(); openAdmin(); return; }
   if (t.closest("#pgoOut")) {
     if (!confirm("Log out of AppHaat?")) return;
+    try { await disablePush(); } catch (err) {}
     await sb.auth.signOut(); $("profDlg").close(); toast("You are logged out.");
     return;
   }
