@@ -5,11 +5,11 @@ function supportHtml(){
 }
 let editingId = null, editingLink = null, mineCache = [];
 const FIELDS = ["sTitle", "sLink", "sPrice", "sCat", "sDesc", "sIcon", "sRev", "sProfit", "sAge", "sTraffic", "sCountry", "sShots"];
-function clearForm(){ FIELDS.forEach(id => { $(id).value = ""; }); $("sType").value = "app"; $("sCur").value = "USD"; }
+function clearForm(){ FIELDS.forEach(id => { $(id).value = ""; }); $("sType").value = ""; $("sCur").value = "USD"; }
 function openEdit(l){
   editingId = l.id; editingLink = l.link;
   clearForm();
-  $("sTitle").value = l.title || ""; $("sType").value = l.type; $("sLink").value = l.link || "";
+  $("sTitle").value = l.title || ""; $("sType").value = l.platform || (l.type === "website" ? "website" : ""); $("sLink").value = l.link || "";
   $("sPrice").value = l.price; $("sCur").value = l.currency || "USD"; $("sCat").value = l.category || "";
   $("sDesc").value = l.description || "";
   $("sRev").value = l.monthly_revenue ?? ""; $("sProfit").value = l.monthly_profit ?? "";
@@ -41,6 +41,7 @@ $("sellGo").onclick = async () => {
   const file = $("sIcon").files[0];
   if (!title) { m.textContent = "Enter the app or website name."; return; }
   if (!category) { m.textContent = "Choose a category."; return; }
+  if (!type) { m.textContent = "Choose a type: website, Android app or iOS app."; return; }
   if (!link) { m.textContent = "Enter a valid link that starts with https://"; return; }
   if (priceRaw === "" || !isFinite(price) || price < 0) { m.textContent = "Enter a valid price."; return; }
   if (!description) { m.textContent = "Add a short description."; return; }
@@ -60,7 +61,7 @@ $("sellGo").onclick = async () => {
     if (up.error) { $("sellGo").disabled = false; m.className = "msg err"; m.textContent = "Could not upload the icon. Please try again."; console.error(up.error); return; }
     icon_url = sb.storage.from("icons").getPublicUrl(path).data.publicUrl;
   }
-  const payload = { title, type, link, price, currency: $("sCur").value, category: category || null, description, ...extra };
+  const payload = { title, type: type === "website" ? "website" : "app", platform: type, link, price, currency: $("sCur").value, category: category || null, description, ...extra };
   if (icon_url) payload.icon_url = icon_url;
   if (shotFiles.length) {
     const urls = [];

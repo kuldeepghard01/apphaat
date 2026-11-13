@@ -46,21 +46,31 @@
   </section>
 
   <div class="tools" id="browse">
-    <input class="search" id="q" type="search" placeholder="Search apps and websites" aria-label="Search listings">
+    <input class="search" id="q" type="search" list="sugList" placeholder="Search by name, category or country" aria-label="Search listings">
+    <datalist id="sugList"></datalist>
     <div class="chips" id="chips">
       <button class="chip" data-t="all" aria-pressed="true">All</button>
-      <button class="chip" data-t="app" aria-pressed="false">Apps</button>
       <button class="chip" data-t="website" aria-pressed="false">Websites</button>
+      <button class="chip" data-t="android" aria-pressed="false">Android apps</button>
+      <button class="chip" data-t="ios" aria-pressed="false">iOS apps</button>
     </div>
     <div class="filters">
       <select class="f" id="fCat" aria-label="Category"></select>
-      <select class="f" id="fSort" aria-label="Sort by"><option value="new">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select>
-      <input class="f" id="fMin" type="number" inputmode="decimal" min="0" placeholder="Min price">
-      <input class="f" id="fMax" type="number" inputmode="decimal" min="0" placeholder="Max price">
-      <select class="f" id="fCur" aria-label="Show prices in"><option value="USD">Show prices in USD ($)</option><option value="INR">Show prices in INR (&#8377;)</option></select>
-      <label class="chk"><input type="checkbox" id="fVer"> Verified only</label>
-      <button class="btn ghost small" id="fClear">Clear filters</button>
+      <select class="f" id="fSort" aria-label="Sort by"><option value="new">Newest first</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="rev">Monthly revenue: high to low</option><option value="traffic">Monthly traffic: high to low</option></select>
     </div>
+    <details class="fmore">
+      <summary id="fMoreSum">More filters</summary>
+      <div class="filters">
+        <input class="f" id="fMin" type="number" inputmode="decimal" min="0" placeholder="Min price">
+        <input class="f" id="fMax" type="number" inputmode="decimal" min="0" placeholder="Max price">
+        <input class="f" id="fRev" type="number" inputmode="decimal" min="0" placeholder="Min monthly revenue">
+        <input class="f" id="fTraffic" type="number" inputmode="numeric" min="0" placeholder="Min monthly traffic">
+        <select class="f" id="fCur" aria-label="Show prices in"><option value="USD">Show prices in USD ($)</option><option value="INR">Show prices in INR (&#8377;)</option></select>
+        <label class="chk"><input type="checkbox" id="fVer"> Verified listings only</label>
+        <label class="chk"><input type="checkbox" id="fNew"> Newly listed (last 7 days)</label>
+      </div>
+    </details>
+    <div class="fbar"><span class="hint" id="fCount"></span><button class="btn ghost small" id="fClear">Clear filters</button></div>
   </div>
 
   <section id="featWrap" hidden>
@@ -118,7 +128,7 @@
       <label for="sTitle">App or website name</label>
       <input class="f" id="sTitle" type="text" maxlength="80" placeholder="e.g. Budget Tracker App">
       <label for="sType">Type</label>
-      <select class="f" id="sType"><option value="app">App</option><option value="website">Website</option></select>
+      <select class="f" id="sType"><option value="">Choose a type</option><option value="website">Website</option><option value="android">Android app</option><option value="ios">iOS app</option><option value="cross">Android and iOS app</option></select>
       <label for="sLink">Link (website URL or app store link)</label>
       <input class="f" id="sLink" type="url" inputmode="url" placeholder="https://">
       <label for="sCur">Currency</label>

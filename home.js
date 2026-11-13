@@ -14,12 +14,17 @@ function cardHtml(l, rank, small){
         <h3>${esc(l.title)}</h3>
         <div class="meta">
           <span class="price">${moneyL(l, l.price)}</span>
-          <span>${l.type === "website" ? "Website" : "App"}</span>
+          <span>${platformLabel(l)}</span>
           ${l.monthly_profit != null ? `<span>Profit ${moneyL(l, l.monthly_profit)}/mo</span>` : ""}
           ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span class="warn">Unverified</span>'}
         </div>
       </div>
     </div></button>`;
+}
+
+function fillSuggest(){
+  const names = [...new Set([...CATEGORIES, ...all.map(l => l.title)])].filter(Boolean).slice(0, 80);
+  $("sugList").innerHTML = names.map(x => `<option value="${esc(x)}">`).join("");
 }
 
 function similar(ref, n){
@@ -35,12 +40,22 @@ function similar(ref, n){
 
 function render(){
   $("fMin").placeholder = "Min price (" + DISPLAY + ")"; $("fMax").placeholder = "Max price (" + DISPLAY + ")";
-  const q = query.trim().toLowerCase();
-  const cat = $("fCat").value, minRaw = $("fMin").value, maxRaw = $("fMax").value;
-  const min = minRaw === "" ? 0 : Number(minRaw), max = maxRaw === "" ? Infinity : Number(maxRaw);
-  const match = (l) => (filterType === "all" || l.type === filterType) && (!cat || l.category === cat) && (!$("fVer").checked || l.verified) &&
-    convert(l.price, l.currency || "USD") >= min && convert(l.price, l.currency || "USD") <= max &&
-    (!q || (l.title || "").toLowerCase().includes(q) || (l.category || "").toLowerCase().includes(q));
+  $("fRev").placeholder = "Min monthly revenue (" + DISPLAY + ")";
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const num = (id, d) => ($(id).value === "" ? d : Number($(id).value));
+  const cat = $("fCat").value, min = num("fMin", 0), max = num("fMax", Infinity);
+  const minRev = num("fRev", 0), minTraffic = num("fTraffic", 0);
+  const onlyNew = $("fNew").checked, onlyVer = $("fVer").checked;
+  const cp = (l) => convert(l.price, l.currency || "USD");
+  const platOk = (l) => filterType === "all" || (filterType === "website" ? l.type === "website" : l.type === "app" && (l.platform === filterType || l.platform === "cross"));
+  const text = (l) => [l.title, l.category, l.description, l.country, platformLabel(l), l.platform === "ios" || l.platform === "cross" ? "iphone" : "", l.type === "website" ? "web site" : ""].join(" ").toLowerCase();
+  const score = (l) => tokens.reduce((s, t) => s + ((l.title || "").toLowerCase().includes(t) ? 3 : 0) + ((l.category || "").toLowerCase().includes(t) ? 2 : 0), 0);
+  const match = (l) => platOk(l) && (!cat || l.category === cat) && (!onlyVer || l.verified) &&
+    (!onlyNew || Date.now() - new Date(l.created_at).getTime() < 7 * 864e5) &&
+    cp(l) >= min && cp(l) <= max &&
+    (!minRev || (l.monthly_revenue != null && convert(l.monthly_revenue, l.currency || "USD") >= minRev)) &&
+    (!minTraffic || (l.traffic != null && Number(l.traffic) >= minTraffic)) &&
+    (!tokens.length || tokens.every(t => text(l).includes(t)));
 
   const feat = featured.filter(f => match(f.listing));
   $("featWrap").hidden = feat.length === 0;
@@ -49,15 +64,22 @@ function render(){
   const featIds = new Set(featured.map(f => f.listing.id));
   const rest = all.filter(l => !featIds.has(l.id) && match(l));
   const sort = $("fSort").value;
-  if (sort === "low") rest.sort((a, b) => convert(a.price, a.currency || "USD") - convert(b.price, b.currency || "USD"));
-  if (sort === "high") rest.sort((a, b) => convert(b.price, b.currency || "USD") - convert(a.price, a.currency || "USD"));
+  if (sort === "low") rest.sort((a, b) => cp(a) - cp(b));
+  else if (sort === "high") rest.sort((a, b) => cp(b) - cp(a));
+  else if (sort === "rev") rest.sort((a, b) => convert(b.monthly_revenue || 0, b.currency || "USD") - convert(a.monthly_revenue || 0, a.currency || "USD"));
+  else if (sort === "traffic") rest.sort((a, b) => Number(b.traffic || 0) - Number(a.traffic || 0));
+  else if (tokens.length) rest.sort((a, b) => score(b) - score(a) || new Date(b.created_at) - new Date(a.created_at));
   $("list").innerHTML = rest.map(l => cardHtml(l, null, true)).join("");
+  const total = rest.length + feat.length;
+  $("fCount").textContent = total + (total === 1 ? " listing found" : " listings found");
+  const active = [$("fMin").value, $("fMax").value, $("fRev").value, $("fTraffic").value].filter(v => v !== "").length + (onlyVer ? 1 : 0) + (onlyNew ? 1 : 0);
+  $("fMoreSum").textContent = active ? `More filters (${active})` : "More filters";
 
   const none = rest.length === 0 && feat.length === 0;
   $("empty").hidden = !none;
   $("empty").textContent = all.length ? "No exact match for these filters." : "No listings found yet. Be the first to list yours.";
   const mid = isFinite(max) ? (min + max) / 2 : min;
-  const sug = none && all.length ? similar({ category: cat, type: filterType === "all" ? "" : filterType, price: mid }, 4) : [];
+  const sug = none && all.length ? similar({ category: cat, type: filterType === "all" ? "" : (filterType === "website" ? "website" : "app"), price: mid }, 4) : [];
   $("sugWrap").hidden = sug.length === 0;
   $("sug").innerHTML = sug.map(l => cardHtml(l, null, true)).join("");
 }
@@ -73,7 +95,7 @@ async function load(){
   featured = (s.data || [])
     .filter(x => x.listings && x.listings.status === "approved")
     .map(x => ({ rank: x.rank, listing: x.listings, ends: x.ends_at }));
-  render(); renderPromo();
+  render(); renderPromo(); fillSuggest();
 }
 
 /* Filters */
@@ -88,10 +110,10 @@ $("chips").addEventListener("click", e => {
 const catOpts = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join("");
 $("fCat").innerHTML = '<option value="">All categories</option>' + catOpts;
 $("sCat").innerHTML = '<option value="">Choose a category</option>' + catOpts;
-["fCat", "fMin", "fMax", "fSort", "fVer"].forEach(id => $(id).addEventListener("input", render));
+["fCat", "fMin", "fMax", "fSort", "fVer", "fRev", "fTraffic", "fNew"].forEach(id => $(id).addEventListener("input", render));
 $("fClear").onclick = () => {
-  ["fCat", "fMin", "fMax", "q"].forEach(id => { $(id).value = ""; });
-  $("fSort").value = "new"; $("fVer").checked = false; query = ""; filterType = "all";
+  ["fCat", "fMin", "fMax", "fRev", "fTraffic", "q"].forEach(id => { $(id).value = ""; });
+  $("fSort").value = "new"; $("fVer").checked = false; $("fNew").checked = false; query = ""; filterType = "all";
   document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.t === "all" ? "true" : "false"));
   render();
 };
@@ -121,7 +143,7 @@ function shotsHtml(l){
 function statsHtml(l){
   const mult = l.monthly_profit > 0 ? (Number(l.price) / (l.monthly_profit * 12)).toFixed(1) + "x" : "";
   const items = [
-    ["Asking price", moneyL(l, l.price)], ["Type", l.type === "website" ? "Website" : "App"],
+    ["Asking price", moneyL(l, l.price)], ["Type", platformLabel(l)],
     l.category && ["Category", l.category],
     l.monthly_revenue != null && ["Monthly revenue", moneyL(l, l.monthly_revenue)],
     l.monthly_profit != null && ["Monthly profit", moneyL(l, l.monthly_profit)],
@@ -149,7 +171,7 @@ function openDetail(id){
     <div class="body" style="display:flex;gap:12px;align-items:center">${iconHtml(l)}
       <div class="meta" style="margin:0">
         <span class="price">${moneyL(l, l.price)}</span>
-        <span>${l.type === "website" ? "Website" : "App"}</span>
+        <span>${platformLabel(l)}</span>
         ${l.category ? `<span>${esc(l.category)}</span>` : ""}
         ${l.verified ? '<button class="linkbtn ok" data-info="verified">Verified &#10003;</button>' : '<button class="linkbtn warn" data-info="unverified">Not verified yet</button>'}
       </div>

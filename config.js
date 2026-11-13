@@ -58,3 +58,9 @@ async function loadSettings(){
   });
 }
 const settingsReady = loadSettings();
+
+/* Type shown to visitors: Website, Android app, iOS app, or both */
+function platformLabel(l){
+  if (l.type === "website") return "Website";
+  return ({ android: "Android app", ios: "iOS app", cross: "Android & iOS app" })[l.platform] || "App";
+}

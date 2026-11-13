@@ -164,3 +164,7 @@ dialog.wide{width:min(96vw,720px)}
 .card{position:relative}
 .heart{position:absolute;top:8px;right:10px;color:var(--red);font-size:16px;line-height:1}
 .wish-item{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.fmore{margin:6px 0}
+.fmore summary{cursor:pointer;font-weight:600;color:var(--head);padding:6px 0}
+.fmore .filters{margin-top:6px}
+.fbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
