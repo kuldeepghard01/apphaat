@@ -142,6 +142,7 @@ function openDetail(id){
   if (!l) return;
   const link = safeUrl(l.link);
   const sim = similar(l, 4);
+  const own = !!user && user.id === l.owner_id;
   $("det").innerHTML = `
     <div class="dlg-head"><h2>${esc(l.title)}</h2><button class="x" data-close aria-label="Close">&times;</button></div>
     <div class="body" style="display:flex;gap:12px;align-items:center">${iconHtml(l)}
@@ -158,10 +159,10 @@ function openDetail(id){
     <h3 style="font-size:18px;margin:14px 0 2px">About this listing</h3>
     <p class="desc" style="margin-top:6px">${esc(l.description || "The seller has not added a description yet.")}</p>
     <div class="row">
-      <button class="btn" id="contactBtn" data-id="${esc(l.id)}">Contact seller</button>
-      <button class="btn ghost" id="saveBtn" data-id="${esc(l.id)}" data-on="0">&#9825; Save</button>
+      ${own ? `<button class="btn" id="anaBtn" data-id="${esc(l.id)}">Listing analytics</button>` : `<button class="btn" id="contactBtn" data-id="${esc(l.id)}">Contact seller</button>
+      <button class="btn ghost" id="saveBtn" data-id="${esc(l.id)}" data-on="0">&#9825; Save</button>`}
       ${link ? `<a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener noreferrer nofollow">Open link</a>` : ""}
-      <button class="btn ghost" id="reportBtn" data-id="${esc(l.id)}">Report</button>
+      ${own ? "" : `<button class="btn ghost" id="reportBtn" data-id="${esc(l.id)}">Report</button>`}
     </div>
     <div class="safe">Verify ownership before you pay. For larger amounts, use a safe method such as Escrow.com.</div>
     ${sim.length ? `<h3 class="sec-title" style="font-size:18px">Similar listings</h3><div class="grid compact">${sim.map(x => cardHtml(x, null, true)).join("")}</div>` : ""}`;
@@ -186,6 +187,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg", "anaDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();

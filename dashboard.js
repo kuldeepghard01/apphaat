@@ -35,7 +35,7 @@ async function openDashboard(){
       <div class="mrow"><strong>${esc(r.title)}</strong><span class="tag">${esc(STATUS[r.status] || r.status)}</span></div>
       ${stat(r)}
       <div class="hint">Contact rate: ${r.views > 0 ? Math.round(r.contacts * 100 / r.views) : 0}% of viewers messaged you.</div>
-      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(r.listing_id)}">View listing</button><button class="btn small ghost" data-dash-inbox>Messages</button></div></div>`).join("")}`;
+      <div class="row"><button class="btn small anaOpen" data-id="${esc(r.listing_id)}">Analytics</button><button class="btn small ghost viewBtn" data-id="${esc(r.listing_id)}">View listing</button><button class="btn small ghost" data-dash-inbox>Messages</button></div></div>`).join("")}`;
 }
 
 /* Save button on a listing */
