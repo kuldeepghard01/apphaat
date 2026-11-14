@@ -183,7 +183,8 @@ function openDetail(id){
     <p class="desc" style="margin-top:6px">${esc(l.description || "The seller has not added a description yet.")}</p>
     <div class="row">
       ${own ? `<button class="btn" id="anaBtn" data-id="${esc(l.id)}">Listing analytics</button>` : `<button class="btn" id="contactBtn" data-id="${esc(l.id)}">Contact seller</button>
-      <button class="btn ghost" id="saveBtn" data-id="${esc(l.id)}" data-on="0">&#9825; Save</button>`}
+      <button class="btn ghost" id="saveBtn" data-id="${esc(l.id)}" data-on="0">&#9825; Save</button>
+      <button class="btn ghost" id="offerBtn" data-id="${esc(l.id)}">Make an offer</button>`}
       ${link ? `<a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener noreferrer nofollow">Open link</a>` : ""}
       ${own ? "" : `<button class="btn ghost" id="reportBtn" data-id="${esc(l.id)}">Report</button>`}
     </div>
@@ -210,6 +211,6 @@ document.addEventListener("click", async e => {
     if (!error) $("detDlg").close();
   }
 });
-["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg", "anaDlg", "wishDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
+["authDlg", "detDlg", "sellDlg", "mineDlg", "featDlg", "adminDlg", "contactDlg", "infoDlg", "payDlg", "profDlg", "sellerDlg", "notifDlg", "inboxDlg", "dashDlg", "anaDlg", "wishDlg", "offerDlg", "offersDlg"].forEach(id => $(id).addEventListener("click", e => { if (e.target === $(id)) $(id).close(); }));
 
 load();

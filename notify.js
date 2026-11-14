@@ -41,6 +41,7 @@ document.addEventListener("click", async e => {
   $("notifDlg").close();
   const k = el.dataset.kind, lid = el.dataset.lid;
   if (k === "message" || k === "contact") openInbox();
+  else if (k === "offer") openOffers();
   else if (["review", "report", "slotreq", "paymentreq", "user"].includes(k) && isAdmin) openAdmin();
   else if (k === "view" || k === "interest") openDashboard();
   else if (k === "listing" || k === "slot") openMine();
