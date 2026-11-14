@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AppHaat: buy and sell apps and websites</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231b2559'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='%23f5a623' font-family='Arial' font-weight='700'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="icon-192.png">
 <meta property="og:title" content="AppHaat: buy and sell apps and websites">
 <meta property="og:description" content="Verified listings, direct contact with sellers, and featured spots.">
 <meta name="theme-color" content="#1b2559">
@@ -35,7 +35,7 @@
   <section class="hero">
     <h1>Buy and sell apps and websites with confidence</h1>
     <p>Verified listings, direct contact with sellers, and promotion slots that put your listing in front of buyers.</p>
-    <div class="row"><button class="btn gold" id="heroSell">Sell now</button><a class="btn ghost" href="#browse">Browse listings</a></div>
+    <div class="row"><button class="btn gold" id="heroSell">Sell now</button><button class="btn ghost" id="heroEst">Free value estimate</button><a class="btn ghost" href="#browse">Browse listings</a></div>
   </section>
 
   <section class="promo-wrap" id="spots">
@@ -141,6 +141,7 @@
       <select class="f" id="sCur"><option value="USD">US Dollar ($)</option><option value="INR">Indian Rupee (&#8377;)</option></select>
       <label for="sPrice">Selling price</label>
       <input class="f" id="sPrice" type="number" inputmode="decimal" min="0" step="any">
+      <div class="row" style="margin:6px 0 0"><button class="btn ghost small" type="button" id="estBtn">Estimate my value</button></div>
       <label for="sRev">Monthly revenue (optional, same currency)</label>
       <input class="f" id="sRev" type="number" inputmode="decimal" min="0" step="any">
       <label for="sProfit">Monthly profit (optional, same currency)</label>
@@ -241,6 +242,23 @@
   </div>
 </dialog>
 
+<dialog id="valDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Value estimator</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <p class="hint" style="margin-top:0">A free estimate from public sale data. It is a guide, not a promised price.</p>
+    <label for="vType">What are you valuing?</label><select class="f" id="vType"></select>
+    <label for="vCur">Currency</label><select class="f" id="vCur"><option value="USD">US Dollar ($)</option><option value="INR">Indian Rupee (&#8377;)</option></select>
+    <label for="vRev">Monthly revenue</label><input class="f" id="vRev" type="number" inputmode="decimal" min="0" step="any">
+    <label for="vExp">Monthly expenses (hosting, ads, tools, staff, cost of goods; not your own salary)</label><input class="f" id="vExp" type="number" inputmode="decimal" min="0" step="any">
+    <label for="vAge">Age in years</label><input class="f" id="vAge" type="number" inputmode="decimal" min="0" step="any">
+    <label for="vTraffic">Monthly visitors or active users (optional)</label><input class="f" id="vTraffic" type="number" inputmode="numeric" min="0" step="1">
+    <label for="vTrend">Revenue trend, last 6 months</label><select class="f" id="vTrend"><option value="stable">Stable</option><option value="growing">Growing</option><option value="declining">Declining</option></select>
+    <label for="vAsk">Your asking price (optional)</label><input class="f" id="vAsk" type="number" inputmode="decimal" min="0" step="any">
+    <div class="msg" id="vMsg" role="status" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="vGo">Estimate value</button></div>
+    <div id="vOut"></div>
+  </div>
+</dialog>
 <dialog id="wishDlg"><div class="dlg"><div class="dlg-head"><h2>Wishlist</h2><button class="x" data-close aria-label="Close">&times;</button></div><div id="wish"></div></div></dialog>
 <dialog id="anaDlg"><div class="dlg" id="ana"></div></dialog>
 <dialog id="dashDlg"><div class="dlg"><div class="dlg-head"><h2>Seller dashboard</h2><button class="x" data-close aria-label="Close">&times;</button></div><div id="dash"></div></div></dialog>
@@ -276,6 +294,7 @@
 <script src="dashboard.js"></script>
 <script src="analytics.js"></script>
 <script src="wishlist.js"></script>
+<script src="valuation.js"></script>
 <script src="admin.js"></script>
 <script src="admin-pay.js"></script>
 <script src="auth.js"></script>
