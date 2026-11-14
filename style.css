@@ -168,3 +168,7 @@ dialog.wide{width:min(96vw,720px)}
 .fmore summary{cursor:pointer;font-weight:600;color:var(--head);padding:6px 0}
 .fmore .filters{margin-top:6px}
 .fbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.sold-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}
+.sold-card{flex:none;width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px}
+.sold-card h3{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sold-card .tag{align-self:flex-start;background:var(--green);color:#fff;border-color:var(--green)}

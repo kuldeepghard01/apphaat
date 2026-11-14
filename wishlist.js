@@ -1,6 +1,8 @@
 /* AppHaat: wishlist (save a listing and see it again later) */
 const setSave = (b, on) => { b.dataset.on = on ? "1" : "0"; b.innerHTML = on ? "&#9829; Saved" : "&#9825; Save"; };
 
+const goneText = (id) => { const s = soldList.find(x => x.listing_id === id); return s ? `${s.title} was sold.` : "A saved listing is no longer available."; };
+
 async function loadSaved(){
   if (!user) { savedIds = new Set(); render(); return; }
   const { data } = await sb.from("favorites").select("listing_id");
@@ -26,7 +28,7 @@ async function openWishlist(){
   const live = rows.filter(r => r.listings), gone = rows.filter(r => !r.listings);
   $("wish").innerHTML = `<div class="hint">${live.length} saved</div>
     <div class="grid compact">${live.map(r => `<div class="wish-item">${cardHtml(r.listings, null, true)}<button class="btn small ghost wishDel" data-id="${esc(r.listing_id)}">Remove</button></div>`).join("")}</div>
-    ${gone.map(r => `<div class="mine"><div class="hint">A saved listing is no longer available.</div><div class="row"><button class="btn small ghost wishDel" data-id="${esc(r.listing_id)}">Remove</button></div></div>`).join("")}`;
+    ${gone.map(r => `<div class="mine"><div class="hint">${esc(goneText(r.listing_id))}</div><div class="row"><button class="btn small ghost wishDel" data-id="${esc(r.listing_id)}">Remove</button></div></div>`).join("")}`;
 }
 
 document.addEventListener("click", async e => {

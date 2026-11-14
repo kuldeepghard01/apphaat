@@ -88,7 +88,7 @@ $("sellGo").onclick = async () => {
   load(); openMine();
 };
 
-const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden" };
+const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden", sold: "Sold" };
 async function openMine(){
   $("mineList").innerHTML = '<div class="empty">Loading...</div>';
   if (!$("mineDlg").open) $("mineDlg").showModal();
@@ -111,7 +111,7 @@ async function openMine(){
       <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
       <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
       <div class="meta"><span>${(st[l.id] || {}).views || 0} views</span><span>${(st[l.id] || {}).views_7d || 0} in 7 days</span><span>${(ch[l.id] || new Set()).size} chats</span></div>
-      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
+      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${l.status === "approved" ? `<button class="btn small ghost soldBtn" data-id="${esc(l.id)}">Mark as sold</button>` : ""}${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
       ${l.verified ? "" : `<div class="safe">To get verified, put this code on your website inside the head tag as <b>&lt;meta name="apphaat-verify" content="${esc(l.verify_code)}"&gt;</b>, or in your app store description. Then contact ${supportHtml()}. Only verified listings can be featured.</div><div class="row"><button class="btn small verBtn" data-id="${esc(l.id)}">Verify now</button></div>`}
       ${l.status === "approved" && l.verified ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
       ${inboxHtml(by[l.id] || [], l.title)}

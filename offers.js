@@ -35,7 +35,7 @@ async function openOffers(){
   const { data, error } = await sb.from("offers").select("*").order("created_at", { ascending: false }).limit(200);
   if (error) { $("offersBody").innerHTML = '<div class="empty">Could not load offers. Please try again.</div>'; return; }
   if (!data.length) { $("offersBody").innerHTML = '<div class="empty">No offers yet. Open a listing and tap Make an offer, or wait for offers on your own listings.</div>'; return; }
-  const lr = await sb.from("listings").select("id,title,price,currency,owner_id").in("id", [...new Set(data.map(o => o.listing_id))]);
+  const lr = await sb.from("listings").select("id,title,price,currency,owner_id,status").in("id", [...new Set(data.map(o => o.listing_id))]);
   const lm = {}; (lr.data || []).forEach(x => { lm[x.id] = x; });
   const nm = await nameMap(data.map(o => o.buyer_id));
   const groups = {};
@@ -46,16 +46,17 @@ async function openOffers(){
 function offerCard(list, lm, nm){
   const o = list[0], l = lm[o.listing_id] || {}, cur = o.currency, mine = l.owner_id === user.id;
   const status = stale(o) ? "expired" : o.status;
+  const tagText = l.status === "sold" && status === "accepted" ? "Sold" : OFFER_STATUS[status];
   const makerIsMe = (o.by_seller ? l.owner_id : o.buyer_id) === user.id;
   const buyerName = nm[o.buyer_id] || "Buyer";
   const who = o.by_seller ? (mine ? "Your counter offer" : "Seller's counter offer") : (mine ? buyerName + "'s offer" : "Your offer");
   let acts = "";
   if (status === "pending" && !makerIsMe) acts = `<button class="btn small offAct" data-act="accept" data-oid="${esc(o.id)}" data-amt="${esc(cm(o.amount, cur))}">Accept</button><button class="btn small ghost offCounter" data-oid="${esc(o.id)}">Counter</button><button class="btn small ghost offAct" data-act="reject" data-oid="${esc(o.id)}">Decline</button>`;
   else if (status === "pending") acts = `<span class="hint">Waiting for the other side.</span><button class="btn small ghost offAct" data-act="withdraw" data-oid="${esc(o.id)}">Withdraw</button>`;
-  else if (status === "accepted") acts = `<div class="safe">Accepted. Agree the next steps in chat. For bigger amounts use a safe method such as Escrow.com.</div><button class="btn small offChat" data-l="${esc(o.listing_id)}" data-b="${esc(o.buyer_id)}" data-title="${esc(l.title || "Listing")}" data-who="${esc(mine ? buyerName : "the seller")}">Open chat</button>`;
+  else if (status === "accepted") acts = `<div class="safe">Accepted. Agree the next steps in chat. For bigger amounts use a safe method such as Escrow.com.</div>${mine && l.status !== "sold" ? `<button class="btn small gold offSold" data-oid="${esc(o.id)}" data-amt="${esc(cm(o.amount, cur))}" data-title="${esc(l.title || "Listing")}">Mark as sold</button>` : ""}<button class="btn small offChat" data-l="${esc(o.listing_id)}" data-b="${esc(o.buyer_id)}" data-title="${esc(l.title || "Listing")}" data-who="${esc(mine ? buyerName : "the seller")}">Open chat</button>`;
   const hist = list.slice(1).map(h => `<div class="hint">${esc(h.by_seller ? "Seller" : (mine ? buyerName : "You"))}: ${esc(cm(h.amount, h.currency))} &middot; ${esc(OFFER_STATUS[stale(h) ? "expired" : h.status])} &middot; ${esc(timeAgo(h.created_at))}</div>`).join("");
   return `<div class="mine">
-    <div class="mrow"><strong>${esc(l.title || "Listing")}</strong><span class="tag">${esc(OFFER_STATUS[status])}</span></div>
+    <div class="mrow"><strong>${esc(l.title || "Listing")}</strong><span class="tag">${esc(tagText)}</span></div>
     <div class="hint">${esc(who)}</div>
     <div style="font-size:20px;font-weight:600;margin:4px 0">${esc(cm(o.amount, cur))}${l.price ? ` <span class="hint">(${pctOf(o.amount, l.price)}% of the ${esc(cm(l.price, cur))} asking price)</span>` : ""}</div>
     ${o.message ? `<div class="desc hint">${esc(o.message)}</div>` : ""}
