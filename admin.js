@@ -134,6 +134,8 @@ function adminSettings(){
     <input class="f" id="cMail" type="email" value="${esc(SUPPORT_EMAIL)}">
     <label for="cOnline">Online payments with Razorpay (automatic, no reference needed)</label>
     <select class="f" id="cOnline"><option value="off">Off</option><option value="on" ${ONLINE_PAY ? "selected" : ""}>On</option></select>
+    <label for="cAuth">Social login buttons (comma separated: google, github, microsoft, facebook, linkedin, apple, discord, twitter)</label>
+    <input class="f" id="cAuth" type="text" value="${esc(AUTH_PROVIDERS.join(", "))}">
     <label for="cFree">Free accounts for the first N sign-ups (0 means nobody is free)</label>
     <input class="f" id="cFree" type="number" min="0" step="1" value="${esc(FREE_LIMIT)}">
     <label for="cRate">Rupees per 1 US dollar (used for the INR/USD switch)</label>
@@ -153,7 +155,7 @@ document.addEventListener("click", async e => {
     m.className = "msg err"; m.textContent = "Check the numbers. Slot prices must be comma separated, up to 20 slots."; return;
   }
   m.className = "msg"; m.textContent = "Saving...";
-  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: $("cBanLink").value.trim() }];
+  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "auth_providers", value: $("cAuth").value.trim().toLowerCase() }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: $("cBanLink").value.trim() }];
   const r = await sb.from("settings").upsert(rows).select("key");
   if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save. Make sure the latest SQL was run."; return; }
   await loadSettings();

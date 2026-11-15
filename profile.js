@@ -18,7 +18,8 @@ async function openProfile(){
     views = (s.data || []).reduce((a, x) => a + x.views, 0);
     chats = new Set((c.data || []).map(x => x.listing_id + x.buyer_id)).size;
   }
-  const name = me.display_name || user.email.split("@")[0];
+  const meta = user.user_metadata || {};
+  const name = me.display_name || meta.full_name || meta.name || (user.email || "").split("@")[0] || "AppHaat user";
   $("prof").innerHTML = `
     <div class="dlg-head"><h2>My profile</h2><button class="x" data-close aria-label="Close">&times;</button></div>
     <div class="prof-top"><div class="avatar-lg">${AVATAR_SVG}</div>
@@ -28,7 +29,7 @@ async function openProfile(){
     <label for="pName">Display name</label><input class="f" id="pName" maxlength="40" value="${esc(me.display_name || "")}">
     <label for="pBio">About you</label><textarea class="f" id="pBio" maxlength="300">${esc(me.bio || "")}</textarea>
     <div class="row"><button class="btn" id="pSave">Save profile</button></div>
-    <div class="row"><button class="btn small" id="pgoDash">Seller dashboard</button><button class="btn ghost small" id="pgoWish">Wishlist</button><button class="btn ghost small" id="pgoOffers">Offers</button><button class="btn ghost small" id="pgoDemand">Demand board</button><button class="btn ghost small" id="pgoMine">My listings</button><button class="btn ghost small" id="pgoInbox">Inbox</button><button class="btn ghost small" id="pgoNotif">Notifications</button>${isAdmin ? '<button class="btn ghost small" id="pgoAdmin">Admin</button>' : ""}<button class="btn ghost small" id="pgoOut">Logout</button></div>`;
+    <div class="row"><button class="btn small" id="pgoDash">Seller dashboard</button><button class="btn ghost small" id="pgoWish">Wishlist</button><button class="btn ghost small" id="pgoOffers">Offers</button><button class="btn ghost small" id="pgoDemand">Demand board</button><button class="btn ghost small" id="pgoMine">My listings</button><button class="btn ghost small" id="pgoInbox">Inbox</button><button class="btn ghost small" id="pgoNotif">Notifications</button>${isAdmin ? '<button class="btn ghost small" id="pgoAdmin">Admin</button>' : ""}<button class="btn ghost small" id="pgoPass">Change password</button><button class="btn ghost small" id="pgoOut">Logout</button></div>`;
 }
 
 async function openSeller(id){

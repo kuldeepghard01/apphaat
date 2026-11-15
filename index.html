@@ -124,12 +124,18 @@
       <button class="chip" id="tabSignup" aria-pressed="false">Sign up</button>
     </div>
     <div id="authNote" class="msg"></div>
+    <div id="authSocial"></div>
+    <div class="or" id="authOr" hidden><span>or use your email</span></div>
     <label for="email">Email</label>
     <input class="f" id="email" type="email" autocomplete="email" inputmode="email">
-    <label for="pass">Password (at least 6 characters)</label>
-    <input class="f" id="pass" type="password" autocomplete="current-password">
+    <div id="passWrap">
+      <label for="pass">Password (at least 6 characters)</label>
+      <input class="f" id="pass" type="password" autocomplete="current-password">
+      <label class="chk" style="margin-top:6px"><input type="checkbox" id="showPass"> Show password</label>
+    </div>
+    <div class="hint" id="resetHint" hidden>We will email you a link to choose a new password.</div>
     <div class="msg" id="authMsg" role="status" aria-live="polite"></div>
-    <div class="row"><button class="btn" id="authGo">Login</button></div>
+    <div class="row"><button class="btn" id="authGo">Login</button><button class="linkbtn" id="forgotBtn">Forgot password?</button><button class="linkbtn" id="backLogin" hidden>Back to login</button></div>
   </div>
 </dialog>
 
@@ -260,6 +266,15 @@
 <dialog id="demandsDlg"><div class="dlg"><div class="dlg-head"><h2>Buyer demand board</h2><button class="x" data-close aria-label="Close">&times;</button></div><div id="demandsBody"></div></div></dialog>
 <dialog id="demandFormDlg"><div class="dlg" id="demForm"></div></dialog>
 <dialog id="respondDlg"><div class="dlg"><div class="dlg-head"><h2>Contact the buyer</h2><button class="x" data-close aria-label="Close">&times;</button></div><div id="respBody"></div></div></dialog>
+<dialog id="passDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2 id="npTitle">Change password</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <label for="np1">New password (at least 6 characters)</label><input class="f" id="np1" type="password" autocomplete="new-password">
+    <label for="np2">Repeat the new password</label><input class="f" id="np2" type="password" autocomplete="new-password">
+    <div class="msg" id="npMsg" role="status" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="npGo">Save new password</button></div>
+  </div>
+</dialog>
 <dialog id="valDlg">
   <div class="dlg">
     <div class="dlg-head"><h2>Value estimator</h2><button class="x" data-close aria-label="Close">&times;</button></div>
@@ -318,6 +333,7 @@
 <script src="demands.js"></script>
 <script src="admin.js"></script>
 <script src="admin-pay.js"></script>
+<script src="authx.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>

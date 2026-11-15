@@ -4,14 +4,18 @@ function openAuth(mode, note){
   setMode(mode);
   $("authNote").textContent = note || ""; $("authNote").className = "msg";
   $("authMsg").textContent = "";
+  paintSocial();
   $("authDlg").showModal();
 }
 function setMode(m){
   authMode = m;
-  $("authTitle").textContent = m === "login" ? "Login" : "Sign up";
-  $("authGo").textContent = m === "login" ? "Login" : "Create account";
+  const reset = m === "reset";
+  $("authTitle").textContent = reset ? "Reset password" : m === "login" ? "Login" : "Sign up";
+  $("authGo").textContent = reset ? "Send reset link" : m === "login" ? "Login" : "Create account";
   $("tabLogin").setAttribute("aria-pressed", m === "login");
   $("tabSignup").setAttribute("aria-pressed", m === "signup");
+  $("passWrap").hidden = reset; $("authSocial").hidden = reset; $("authOr").hidden = reset || !hasSocial();
+  $("forgotBtn").hidden = m !== "login"; $("backLogin").hidden = !reset; $("resetHint").hidden = !reset;
   $("pass").autocomplete = m === "login" ? "current-password" : "new-password";
 }
 $("tabLogin").onclick = () => setMode("login");
@@ -20,6 +24,15 @@ $("tabSignup").onclick = () => setMode("signup");
 $("authGo").onclick = async () => {
   const email = $("email").value.trim(), password = $("pass").value;
   const m = $("authMsg"); m.className = "msg err";
+  if (authMode === "reset") {
+    if (!email) { m.textContent = "Enter your email."; return; }
+    $("authGo").disabled = true; m.className = "msg"; m.textContent = "Please wait...";
+    const r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    $("authGo").disabled = false;
+    if (r.error) { m.className = "msg err"; m.textContent = r.error.message; return; }
+    m.className = "msg good"; m.textContent = "If this email has an account, a reset link is on its way. Check your inbox and spam folder.";
+    return;
+  }
   if (!email || !password) { m.textContent = "Enter both email and password."; return; }
   if (password.length < 6) { m.textContent = "Password must be at least 6 characters."; return; }
   $("authGo").disabled = true; m.className = "msg"; m.textContent = "Please wait...";
@@ -53,5 +66,5 @@ function paintUser(){
 $("avatarBtn").onclick = openProfile;
 $("loginBtn").onclick = () => openAuth("login");
 $("sellBtn").onclick = openSell;
-sb.auth.onAuthStateChange((_ev, session) => { user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); });
+sb.auth.onAuthStateChange((_ev, session) => { user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); if (_ev === "PASSWORD_RECOVERY") openNewPassword(true); });
 sb.auth.getSession().then(({ data }) => { user = data.session ? data.session.user : null; paintUser(); syncAdmin(); });

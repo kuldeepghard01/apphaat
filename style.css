@@ -172,3 +172,8 @@ dialog.wide{width:min(96vw,720px)}
 .sold-card{flex:none;width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px}
 .sold-card h3{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sold-card .tag{align-self:flex-start;background:var(--green);color:#fff;border-color:var(--green)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:10px 0}
+.or[hidden]{display:none}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.socBtn{width:100%;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#authSocial[hidden],#passWrap[hidden]{display:none}
