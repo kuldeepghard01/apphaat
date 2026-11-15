@@ -3,7 +3,7 @@ const SUPABASE_URL = "https://lsbjpdblcdlrddnrzqax.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzYmpwZGJsY2RscmRkbnJ6cWF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzODM5MDEsImV4cCI6MjEwOTk1OTkwMX0.2XusRIKZCzFsXyTBZ6bQFOmYHbHGRoLq33xun3rCYiw";
 let SUPPORT_EMAIL = ""; // set from the admin panel (Settings)
 let SLOT_PRICES = { 1: 20, 2: 15, 3: 10 }; // set from the admin panel (Settings)
-let BANNER = { text: "", link: "" }; // top banner, set from the admin panel (Settings)
+let BANNER = { text: "", link: "", image: "", ratio: "" }; // top banner, set from the admin panel (Settings)
 let USD_INR = 88; // rupees per dollar, set from the admin panel (Settings)
 let DISPLAY = "USD";
 try { if (localStorage.getItem("apphaat_cur") === "INR") DISPLAY = "INR"; } catch (e) {}
@@ -52,6 +52,8 @@ async function loadSettings(){
     if (r.key === "usd_inr" && Number(r.value) > 0) USD_INR = Number(r.value);
     if (r.key === "banner_text") BANNER.text = r.value || "";
     if (r.key === "banner_link") BANNER.link = r.value || "";
+    if (r.key === "banner_image") BANNER.image = r.value || "";
+    if (r.key === "banner_ratio") BANNER.ratio = r.value || "";
     if (r.key === "account_fee") ACCOUNT_FEE = Number(r.value) || 0;
     if (r.key === "slot_prices") {
       const p = String(r.value).split(",").map(x => Number(x.trim())).filter(x => isFinite(x) && x >= 0).slice(0, 20);

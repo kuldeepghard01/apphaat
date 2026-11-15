@@ -143,7 +143,12 @@ function adminSettings(){
     <label for="cBan">Top banner message (an ad or announcement, leave empty to hide)</label>
     <input class="f" id="cBan" type="text" maxlength="120" value="${esc(BANNER.text)}">
     <label for="cBanLink">Banner link (optional)</label>
-    <input class="f" id="cBanLink" type="url" placeholder="https://" value="${esc(BANNER.link)}">
+    <input class="f" id="cBanLink" type="text" inputmode="url" autocapitalize="off" placeholder="https://example.com" value="${esc(BANNER.link)}">
+    <label>Banner image (optional, any size or shape)</label>
+    <div class="row"><button class="btn ghost small" type="button" id="banPick">${UP_SVG} Upload banner image</button><button class="btn ghost small" type="button" id="banDel" ${safeUrl(BANNER.image) ? "" : "hidden"}>Remove image</button></div>
+    <input type="file" id="banFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+    <div id="banPreview">${bannerPreviewHtml()}</div>
+    <div class="hint">The banner follows your image's own shape, so nothing is stretched or cut. If an image and a message are both set, the image is shown.</div>
     <div class="row"><button class="btn" id="aSaveCfg">Save settings</button></div>
     <div class="msg" id="cMsg" role="status" aria-live="polite"></div>`;
 }
@@ -154,11 +159,14 @@ document.addEventListener("click", async e => {
   if (!(Number($("cRate").value) > 0) || !(Number($("cFree").value) >= 0) || !isFinite(fee) || fee < 0 || $("cFee").value === "" || parts.length > 20 || parts.some(x => x === "" || !isFinite(Number(x)) || Number(x) < 0)) {
     m.className = "msg err"; m.textContent = "Check the numbers. Slot prices must be comma separated, up to 20 slots."; return;
   }
+  let banLink = $("cBanLink").value.trim();
+  if (banLink && !/^https?:\/\//i.test(banLink)) banLink = "https://" + banLink;
+  if (banLink && !safeUrl(banLink)) { m.className = "msg err"; m.textContent = "The banner link must be a valid web address, for example https://example.com"; return; }
   m.className = "msg"; m.textContent = "Saving...";
-  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "auth_providers", value: $("cAuth").value.trim().toLowerCase() }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: $("cBanLink").value.trim() }];
+  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "auth_providers", value: $("cAuth").value.trim().toLowerCase() }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: banLink }];
   const r = await sb.from("settings").upsert(rows).select("key");
-  if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save. Make sure the latest SQL was run."; return; }
-  await loadSettings();
+  if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save: " + (r.error ? r.error.message : "nothing was saved. Make sure the latest SQL was run."); return; }
+  await loadSettings(); paintBanner();
   m.className = "msg good"; m.textContent = "Saved \u2713 Your settings are updated."; toast("Settings saved."); m.scrollIntoView({ block: "nearest" });
 });
 

@@ -154,11 +154,19 @@ function statsHtml(l){
   ].filter(Boolean);
   return `<div class="stats">${items.map(([k, v]) => `<button class="stat" ${k === "Category" ? `data-cat="${esc(v)}"` : `data-info="stat" data-key="${esc(k)}"`}><span>${esc(k)}</span><b>${esc(v)}</b></button>`).join("")}</div>`;
 }
-settingsReady.then(() => {
-  const b = $("banner"), t = (BANNER.text || "").trim(), u = safeUrl(BANNER.link);
-  b.hidden = !t;
-  if (t) b.innerHTML = u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow">${esc(t)}</a>` : esc(t);
-});
+function paintBanner(){
+  const b = $("banner"), t = (BANNER.text || "").trim(), u = safeUrl(BANNER.link), img = safeUrl(BANNER.image);
+  b.className = img ? "banner banner-img" : "banner";
+  b.hidden = !t && !img;
+  if (img) {
+    const ratio = Number(BANNER.ratio) > 0 ? Number(BANNER.ratio) : 0;
+    const tag = `<img src="${esc(img)}" alt="${esc(t || "Announcement")}"${ratio ? ` style="aspect-ratio:${ratio}"` : ""}>`;
+    b.innerHTML = u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow">${tag}</a>` : tag;
+  } else if (t) {
+    b.innerHTML = u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow">${esc(t)}</a>` : esc(t);
+  }
+}
+settingsReady.then(paintBanner);
 const findListing = (id) => [...all, ...featured.map(f => f.listing)].find(x => x.id === id);
 function openDetail(id){
   const l = findListing(id);
