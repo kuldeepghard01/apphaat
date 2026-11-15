@@ -39,7 +39,7 @@ async function openDemands(){
       const live = d.status === "open" && new Date(d.expires_at) > new Date();
       return `<div class="mine"><div class="mrow"><strong>${esc(d.title)}</strong><span class="tag">${live ? "Open" : "Closed"}</span></div>
         <div class="hint">${esc((d.budget_min > 0 ? cm(d.budget_min, d.currency) + " to " : "Up to ") + cm(d.budget_max, d.currency))} &middot; ${cnt[d.id] || 0} responses &middot; ${esc(timeAgo(d.created_at))}</div>
-        <div class="row">${live ? `<button class="btn small ghost demClose" data-id="${esc(d.id)}">Close request</button>` : ""}<button class="btn small ghost" data-open-inbox>Messages</button></div></div>`;
+        <div class="row"><button class="btn small ghost demDel" data-id="${esc(d.id)}">Remove request</button><button class="btn small ghost" data-open-inbox>Messages</button></div></div>`;
     }).join("") || '<div class="empty">You have not posted a request yet.</div>');
     return;
   }
@@ -62,7 +62,7 @@ function openDemandForm(){
     <label for="dDetails">Details (optional)</label><textarea class="f" id="dDetails" maxlength="1000" placeholder="Traffic, revenue, age or anything else that matters to you"></textarea>
     <div class="msg" id="dMsg" role="status" aria-live="polite"></div>
     <div class="row"><button class="btn" id="dGo">Post request</button></div>
-    <div class="safe">Sellers with a matching listing are notified. They contact you in your Inbox. Your request stays open for 30 days.</div>`;
+    <div class="safe">Sellers with a matching listing are notified. They contact you in your Inbox. Your request stays open for 30 days. You can remove it any time from Demand board, My requests.</div>`;
   if (!$("demandFormDlg").open) $("demandFormDlg").showModal();
 }
 
@@ -93,11 +93,12 @@ document.addEventListener("click", async e => {
   const tb = t.closest(".demTab"); if (tb) { demTab = tb.dataset.tab; openDemands(); return; }
   const ty = t.closest(".demType"); if (ty) { demType = ty.dataset.t; openDemands(); return; }
   if (t.closest("[data-open-inbox]")) { $("demandsDlg").close(); openInbox(); return; }
-  const cl = t.closest(".demClose");
-  if (cl) {
-    if (!confirm("Close this request? Sellers will no longer see it.")) return;
-    const r = await sb.from("demands").update({ status: "closed" }).eq("id", cl.dataset.id).select("id");
-    toast(r.error || !r.data.length ? "Could not close the request." : "Request closed."); loadDemands(); openDemands();
+  const dl = t.closest(".demDel");
+  if (dl) {
+    if (!confirm("Remove this request? Sellers will no longer see it. Chats you already started stay in your Inbox.")) return;
+    const r = await sb.from("demands").delete().eq("id", dl.dataset.id).select("id");
+    toast(r.error || !r.data.length ? "Could not remove the request." : "Request removed.");
+    loadDemands(); openDemands();
     return;
   }
   if (t.closest("#dGo")) {
