@@ -35,7 +35,40 @@
   <section class="hero">
     <h1>Buy and sell apps and websites with confidence</h1>
     <p>Verified listings, direct contact with sellers, and promotion slots that put your listing in front of buyers.</p>
-    <div class="row"><button class="btn gold" id="heroSell">Sell now</button><button class="btn ghost" id="heroEst">Free value estimate</button><a class="btn ghost" href="#browse">Browse listings</a></div>
+    <div class="row"><button class="btn gold" id="heroSell">Sell now</button><button class="btn ghost" id="heroEst">Free value estimate</button><button class="btn ghost" id="heroBrowse">Browse listings</button></div>
+  </section>
+
+  <div class="homesearch"><input class="search" id="homeQ" type="search" placeholder="Search apps and websites" aria-label="Search"><button class="btn" id="homeGo">Search</button></div>
+
+  <section id="soldWrap" hidden>
+    <h2 class="sec-title">Recently sold</h2>
+    <p class="hint" style="margin:-4px 0 8px">Only deals where the seller and buyer agreed on an offer and the seller confirmed the sale.</p>
+    <div class="sold-row" id="soldRow"></div>
+  </section>
+
+  <section id="featWrap" hidden>
+    <h2 class="sec-title">Featured this week</h2>
+    <div class="grid feat" id="feat"></div>
+  </section>
+
+  <section id="trendWrap" hidden>
+    <h2 class="sec-title">Most popular right now</h2>
+    <p class="hint" style="margin:-4px 0 8px">Listings buyers show the most interest in: views, saves, chats and offers.</p>
+    <div class="grid compact" id="trend"></div>
+  </section>
+
+  <section id="latestWrap" hidden>
+    <h2 class="sec-title">Newest listings</h2>
+    <div class="grid compact" id="latest"></div>
+  </section>
+  <div class="row" id="seeAllRow" hidden><button class="btn" id="seeAll">See all listings</button></div>
+  <div class="empty" id="homeEmpty" hidden>No listings yet. Be the first to list yours.</div>
+
+  <section id="demandWrap">
+    <h2 class="sec-title">Buyers are looking for</h2>
+    <p class="hint" style="margin:-4px 0 8px">Have a matching website or app? Contact the buyer directly.</p>
+    <div id="demandPreview"></div>
+    <div class="row"><button class="btn small" id="demandAll">See all requests</button><button class="btn gold small" id="demandPost">Post what you want to buy</button></div>
   </section>
 
   <section class="promo-wrap" id="spots">
@@ -50,65 +83,11 @@
     <div role="button" tabindex="0" data-info="how-verify"><b>2. Get verified</b><span>Prove ownership and earn the Verified badge.</span></div>
     <div role="button" tabindex="0" data-info="how-connect"><b>3. Connect</b><span>Buyers message you directly. You close the deal.</span></div>
   </section>
-
-  <div class="tools" id="browse">
-    <input class="search" id="q" type="search" list="sugList" placeholder="Search by name, category or country" aria-label="Search listings">
-    <datalist id="sugList"></datalist>
-    <div class="chips" id="chips">
-      <button class="chip" data-t="all" aria-pressed="true">All</button>
-      <button class="chip" data-t="website" aria-pressed="false">Websites</button>
-      <button class="chip" data-t="android" aria-pressed="false">Android apps</button>
-      <button class="chip" data-t="ios" aria-pressed="false">iOS apps</button>
-    </div>
-    <div class="filters">
-      <select class="f" id="fCat" aria-label="Category"></select>
-      <select class="f" id="fSort" aria-label="Sort by"><option value="new">Newest first</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="rev">Monthly revenue: high to low</option><option value="traffic">Monthly traffic: high to low</option></select>
-    </div>
-    <details class="fmore">
-      <summary id="fMoreSum">More filters</summary>
-      <div class="filters">
-        <input class="f" id="fMin" type="number" inputmode="decimal" min="0" placeholder="Min price">
-        <input class="f" id="fMax" type="number" inputmode="decimal" min="0" placeholder="Max price">
-        <input class="f" id="fRev" type="number" inputmode="decimal" min="0" placeholder="Min monthly revenue">
-        <input class="f" id="fTraffic" type="number" inputmode="numeric" min="0" placeholder="Min monthly traffic">
-        <select class="f" id="fCur" aria-label="Show prices in"><option value="USD">Show prices in USD ($)</option><option value="INR">Show prices in INR (&#8377;)</option></select>
-        <label class="chk"><input type="checkbox" id="fVer"> Verified listings only</label>
-        <label class="chk"><input type="checkbox" id="fNew"> Newly listed (last 7 days)</label>
-      </div>
-    </details>
-    <div class="fbar"><span class="hint" id="fCount"></span><button class="btn ghost small" id="fClear">Clear filters</button></div>
-  </div>
-
-  <section id="featWrap" hidden>
-    <h2 class="sec-title">Featured this week</h2>
-    <div class="grid feat" id="feat"></div>
-  </section>
-
-  <section id="soldWrap" hidden>
-    <h2 class="sec-title">Recently sold</h2>
-    <p class="hint" style="margin:-4px 0 8px">Only deals where the seller and buyer agreed on an offer and the seller confirmed the sale.</p>
-    <div class="sold-row" id="soldRow"></div>
-  </section>
-
-  <section id="demandWrap">
-    <h2 class="sec-title">Buyers are looking for</h2>
-    <p class="hint" style="margin:-4px 0 8px">Have a matching website or app? Contact the buyer directly.</p>
-    <div id="demandPreview"></div>
-    <div class="row"><button class="btn small" id="demandAll">See all requests</button><button class="btn gold small" id="demandPost">Post what you want to buy</button></div>
-  </section>
-
-  <h2 class="sec-title">Latest listings</h2>
-  <div class="grid compact" id="list"></div>
-  <div class="empty" id="empty" hidden>No listings found yet. Be the first to list yours.</div>
-  <section id="sugWrap" hidden>
-    <h2 class="sec-title">You may also like</h2>
-    <div class="grid compact" id="sug"></div>
-  </section>
 </main>
 
 <footer class="foot">
   <div class="fcols">
-    <div><b>Buy</b><a href="#browse">Browse listings</a><a href="#" id="footDemand">Buyer demand board</a></div>
+    <div><b>Buy</b><a href="#" id="footBrowse">Browse listings</a><a href="#" id="footDemand">Buyer demand board</a></div>
     <div><b>Sell</b><a href="#" id="footSell">List your app or website</a><a href="#" id="footAd">Promote your listing</a></div>
     <div><b>AppHaat</b><span>Verified listings. No commission on sales.</span></div>
   </div>
@@ -275,6 +254,45 @@
     <div class="row"><button class="btn" id="npGo">Save new password</button></div>
   </div>
 </dialog>
+<dialog id="browseDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Browse all listings</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <div class="tools" id="browse">
+    <input class="search" id="q" type="search" list="sugList" placeholder="Search by name, category or country" aria-label="Search listings">
+    <datalist id="sugList"></datalist>
+    <div class="chips" id="chips">
+      <button class="chip" data-t="all" aria-pressed="true">All</button>
+      <button class="chip" data-t="website" aria-pressed="false">Websites</button>
+      <button class="chip" data-t="android" aria-pressed="false">Android apps</button>
+      <button class="chip" data-t="ios" aria-pressed="false">iOS apps</button>
+    </div>
+    <div class="filters">
+      <select class="f" id="fCat" aria-label="Category"></select>
+      <select class="f" id="fSort" aria-label="Sort by"><option value="new">Newest first</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="rev">Monthly revenue: high to low</option><option value="traffic">Monthly traffic: high to low</option></select>
+    </div>
+    <details class="fmore">
+      <summary id="fMoreSum">More filters</summary>
+      <div class="filters">
+        <input class="f" id="fMin" type="number" inputmode="decimal" min="0" placeholder="Min price">
+        <input class="f" id="fMax" type="number" inputmode="decimal" min="0" placeholder="Max price">
+        <input class="f" id="fRev" type="number" inputmode="decimal" min="0" placeholder="Min monthly revenue">
+        <input class="f" id="fTraffic" type="number" inputmode="numeric" min="0" placeholder="Min monthly traffic">
+        <select class="f" id="fCur" aria-label="Show prices in"><option value="USD">Show prices in USD ($)</option><option value="INR">Show prices in INR (&#8377;)</option></select>
+        <label class="chk"><input type="checkbox" id="fVer"> Verified listings only</label>
+        <label class="chk"><input type="checkbox" id="fNew"> Newly listed (last 7 days)</label>
+      </div>
+    </details>
+    <div class="fbar"><span class="hint" id="fCount"></span><button class="btn ghost small" id="fClear">Clear filters</button></div>
+  </div>
+    <div class="grid compact" id="list"></div>
+    <div class="row" id="bMoreRow" hidden><button class="btn" id="bMore">Load more</button></div>
+    <div class="empty" id="empty" hidden>No listings found yet. Be the first to list yours.</div>
+    <section id="sugWrap" hidden>
+      <h2 class="sec-title">You may also like</h2>
+      <div class="grid compact" id="sug"></div>
+    </section>
+  </div>
+</dialog>
 <dialog id="valDlg">
   <div class="dlg">
     <div class="dlg-head"><h2>Value estimator</h2><button class="x" data-close aria-label="Close">&times;</button></div>
@@ -316,6 +334,7 @@
 <script src="layers.js"></script>
 <script src="config.js"></script>
 <script src="home.js"></script>
+<script src="browse.js"></script>
 <script src="contact.js"></script>
 <script src="info.js"></script>
 <script src="verify.js"></script>

@@ -193,3 +193,7 @@ dialog.wide{width:min(96vw,720px)}
 .banner-img img{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;margin:0 auto}
 .banner-prev img{max-width:100%;max-height:140px;border-radius:8px;border:1px solid var(--line)}
 .btn[hidden]{display:none}
+.homesearch{display:flex;gap:8px;margin:12px 0}
+.homesearch .search{flex:1}
+#seeAllRow{margin:10px 0 18px}
+#bMoreRow{margin:12px 0}

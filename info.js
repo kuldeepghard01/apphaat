@@ -37,7 +37,7 @@ document.addEventListener("click", e => {
   if (c) {
     document.querySelectorAll("dialog[open]").forEach(d => d.close());
     $("fCat").value = c.dataset.cat; render();
-    $("browse").scrollIntoView({ behavior: "smooth" });
+    openBrowse();
     return;
   }
   if (e.target.closest("[data-book]")) { $("infoDlg").close(); $("promoBtn").onclick(); return; }

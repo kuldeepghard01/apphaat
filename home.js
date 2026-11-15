@@ -4,7 +4,10 @@ function iconHtml(l){
   if (u) return `<img class="icon" src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
   return `<div class="icon" aria-hidden="true">${esc((l.title || "?").trim().charAt(0).toUpperCase())}</div>`;
 }
-function cardHtml(l, rank, small){
+let browseLimit = 24, interest = [], homeLoaded = false;
+const HOME_MAX = 30; // most listings shown on the home page besides featured ones
+
+function cardHtml(l, rank, small, extra){
   return `<button class="card${small ? " sm" : ""}" data-id="${esc(l.id)}">
     ${rank ? '<div class="awning"></div>' : ""}
     ${savedIds.has(l.id) ? '<span class="heart" aria-label="Saved">&#9829;</span>' : ""}
@@ -18,6 +21,7 @@ function cardHtml(l, rank, small){
           ${l.monthly_profit != null ? `<span>Profit ${moneyL(l, l.monthly_profit)}/mo</span>` : ""}
           ${l.verified ? '<span class="ok">Verified &#10003;</span>' : '<span class="warn">Unverified</span>'}
         </div>
+        ${extra || ""}
       </div>
     </div></button>`;
 }
@@ -57,41 +61,64 @@ function render(){
     (!minTraffic || (l.traffic != null && Number(l.traffic) >= minTraffic)) &&
     (!tokens.length || tokens.every(t => text(l).includes(t)));
 
-  const feat = featured.filter(f => match(f.listing));
-  $("featWrap").hidden = feat.length === 0;
-  $("feat").innerHTML = feat.map(f => cardHtml(f.listing, f.rank)).join("");
-
-  const featIds = new Set(featured.map(f => f.listing.id));
-  const rest = all.filter(l => !featIds.has(l.id) && match(l));
+  const rest = all.filter(match);
   const sort = $("fSort").value;
   if (sort === "low") rest.sort((a, b) => cp(a) - cp(b));
   else if (sort === "high") rest.sort((a, b) => cp(b) - cp(a));
   else if (sort === "rev") rest.sort((a, b) => convert(b.monthly_revenue || 0, b.currency || "USD") - convert(a.monthly_revenue || 0, a.currency || "USD"));
   else if (sort === "traffic") rest.sort((a, b) => Number(b.traffic || 0) - Number(a.traffic || 0));
   else if (tokens.length) rest.sort((a, b) => score(b) - score(a) || new Date(b.created_at) - new Date(a.created_at));
-  $("list").innerHTML = rest.map(l => cardHtml(l, null, true)).join("");
-  const total = rest.length + feat.length;
+  $("list").innerHTML = rest.slice(0, browseLimit).map(l => cardHtml(l, null, true)).join("");
+  $("bMoreRow").hidden = rest.length <= browseLimit;
+  $("bMore").textContent = "Load more (" + (rest.length - browseLimit) + " left)";
+  const total = rest.length;
   $("fCount").textContent = total + (total === 1 ? " listing found" : " listings found");
   const active = [$("fMin").value, $("fMax").value, $("fRev").value, $("fTraffic").value].filter(v => v !== "").length + (onlyVer ? 1 : 0) + (onlyNew ? 1 : 0);
   $("fMoreSum").textContent = active ? `More filters (${active})` : "More filters";
 
-  const none = rest.length === 0 && feat.length === 0;
+  const none = rest.length === 0;
   $("empty").hidden = !none;
   $("empty").textContent = all.length ? "No exact match for these filters." : "No listings found yet. Be the first to list yours.";
   const mid = isFinite(max) ? (min + max) / 2 : min;
   const sug = none && all.length ? similar({ category: cat, type: filterType === "all" ? "" : (filterType === "website" ? "website" : "app"), price: mid }, 4) : [];
   $("sugWrap").hidden = sug.length === 0;
   $("sug").innerHTML = sug.map(l => cardHtml(l, null, true)).join("");
+  renderHome();
+}
+
+/* Home page: curated sections only. The full list lives in Browse all listings. */
+function renderHome(){
+  const featIds = new Set(featured.map(f => f.listing.id));
+  $("featWrap").hidden = !featured.length;
+  $("feat").innerHTML = featured.map(f => cardHtml(f.listing, f.rank)).join("");
+
+  const byId = {}; all.forEach(l => { byId[l.id] = l; });
+  const trend = interest.filter(x => byId[x.listing_id] && !featIds.has(x.listing_id)).slice(0, 10);
+  const trendIds = new Set(trend.map(x => x.listing_id));
+  $("trendWrap").hidden = !trend.length;
+  $("trend").innerHTML = trend.map(x => cardHtml(byId[x.listing_id], null, true,
+    `<div class="hint">${x.views} views &middot; ${x.saves} saves${x.contacts ? " &middot; " + x.contacts + " chats" : ""}</div>`)).join("");
+
+  const latest = all.filter(l => !featIds.has(l.id) && !trendIds.has(l.id)).slice(0, Math.max(0, HOME_MAX - trend.length));
+  $("latestWrap").hidden = !latest.length;
+  $("latest").innerHTML = latest.map(l => cardHtml(l, null, true)).join("");
+
+  $("seeAllRow").hidden = all.length <= featIds.size + trend.length + latest.length;
+  $("seeAll").textContent = "See all " + all.length + " listings";
+  $("homeEmpty").hidden = !homeLoaded || all.length > 0;
 }
 
 async function load(){
   const now = new Date().toISOString();
-  const [a, s] = await Promise.all([
-    sb.from("listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
-    sb.from("slots").select("rank, ends_at, listings(*)").lte("starts_at", now).gte("ends_at", now).order("rank")
+  const [a, s, iv] = await Promise.all([
+    sb.from("listings").select("*").eq("status", "approved").order("created_at", { ascending: false }).limit(500),
+    sb.from("slots").select("rank, ends_at, listings(*)").lte("starts_at", now).gte("ends_at", now).order("rank"),
+    sb.from("listing_interest").select("*").gt("score", 0).order("score", { ascending: false }).limit(30)
   ]);
   if (a.error) { toast("Could not load listings. Check your internet and try again."); console.error(a.error); }
   all = a.data || [];
+  interest = iv.data || [];
+  homeLoaded = true;
   featured = (s.data || [])
     .filter(x => x.listings && x.listings.status === "approved")
     .map(x => ({ rank: x.rank, listing: x.listings, ends: x.ends_at }));
@@ -99,10 +126,10 @@ async function load(){
 }
 
 /* Filters */
-$("q").addEventListener("input", e => { query = e.target.value; render(); });
+$("q").addEventListener("input", e => { query = e.target.value; browseLimit = 24; render(); });
 $("chips").addEventListener("click", e => {
   const b = e.target.closest(".chip"); if (!b) return;
-  filterType = b.dataset.t;
+  filterType = b.dataset.t; browseLimit = 24;
   document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", c === b ? "true" : "false"));
   render();
 });
@@ -110,10 +137,10 @@ $("chips").addEventListener("click", e => {
 const catOpts = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join("");
 $("fCat").innerHTML = '<option value="">All categories</option>' + catOpts;
 $("sCat").innerHTML = '<option value="">Choose a category</option>' + catOpts;
-["fCat", "fMin", "fMax", "fSort", "fVer", "fRev", "fTraffic", "fNew"].forEach(id => $(id).addEventListener("input", render));
+["fCat", "fMin", "fMax", "fSort", "fVer", "fRev", "fTraffic", "fNew"].forEach(id => $(id).addEventListener("input", () => { browseLimit = 24; render(); }));
 $("fClear").onclick = () => {
   ["fCat", "fMin", "fMax", "fRev", "fTraffic", "q"].forEach(id => { $(id).value = ""; });
-  $("fSort").value = "new"; $("fVer").checked = false; $("fNew").checked = false; query = ""; filterType = "all";
+  $("fSort").value = "new"; $("fVer").checked = false; $("fNew").checked = false; query = ""; filterType = "all"; browseLimit = 24;
   document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.t === "all" ? "true" : "false"));
   render();
 };
