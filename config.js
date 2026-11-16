@@ -15,6 +15,7 @@ function moneyL(l, n){ // amounts of a listing, shown in the visitor's chosen cu
 }
 let savedIds = new Set(); // ids of listings the visitor saved to the wishlist
 let AUTH_PROVIDERS = []; // social login buttons to show, set from the admin panel (Settings)
+let BIZ = { name: "", address: "", phone: "" }; // business details shown on the Contact page, set in Admin > Settings
 let ONLINE_PAY = false; // automatic online payments (Razorpay), switched on in the admin panel
 let FREE_LIMIT = 100; // first N sign-ups get a free account, set from the admin panel
 let ACCOUNT_FEE = 5; // set from the admin panel (Settings)
@@ -47,6 +48,9 @@ async function loadSettings(){
   (data || []).forEach(r => {
     if (r.key === "support_email") SUPPORT_EMAIL = r.value || "";
     if (r.key === "auth_providers") AUTH_PROVIDERS = String(r.value || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+    if (r.key === "business_name") BIZ.name = r.value || "";
+    if (r.key === "business_address") BIZ.address = r.value || "";
+    if (r.key === "support_phone") BIZ.phone = r.value || "";
     if (r.key === "online_pay") ONLINE_PAY = r.value === "on";
     if (r.key === "free_limit") FREE_LIMIT = Number(r.value) || 0;
     if (r.key === "usd_inr" && Number(r.value) > 0) USD_INR = Number(r.value);

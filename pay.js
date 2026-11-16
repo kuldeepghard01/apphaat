@@ -6,7 +6,7 @@ async function openPay(purpose, amountUsd, refId){
   payCtx = { purpose, amountUsd: Number(amountUsd), refId: refId || null };
   const inr = Math.round(payCtx.amountUsd * USD_INR);
   $("payFor").innerHTML = `Amount to pay: <b>${esc(money(payCtx.amountUsd))}</b> (about \u20B9${esc(inr.toLocaleString("en-IN"))})`;
-  $("payMsg").textContent = ""; $("payRef").value = "";
+  $("payMsg").textContent = ""; $("payRef").value = ""; $("payAgree").checked = false;
   $("payList").innerHTML = '<div class="empty">Loading...</div>';
   if (!$("payDlg").open) $("payDlg").showModal();
   const { data } = await sb.from("payment_methods").select("*").eq("enabled", true).order("created_at");
@@ -43,6 +43,7 @@ document.addEventListener("click", async e => {
   }
   const po = e.target.closest("#payOnline");
   if (po) {
+    if (!$("payAgree").checked) { toast("Please tick the box to agree to the policies first."); return; }
     po.disabled = true; po.textContent = "Please wait...";
     const { data, error } = await sb.functions.invoke("create-payment", { body: { purpose: payCtx.purpose, ref_id: payCtx.refId, return_url: location.origin + location.pathname } });
     if (error || !data || !data.url) { toast((data && data.error) || "Online payment is not available right now."); po.disabled = false; po.textContent = "Pay online"; return; }
@@ -58,6 +59,7 @@ document.addEventListener("click", async e => {
 $("payGo").onclick = async () => {
   const m = $("payMsg"), ref = $("payRef").value.trim();
   m.className = "msg err";
+  if (!$("payAgree").checked) { m.textContent = "Please tick the box to agree to the policies first."; return; }
   if (ref.length < 4) { m.textContent = "Enter the payment reference (UTR or transaction ID)."; return; }
   $("payGo").disabled = true; m.className = "msg"; m.textContent = "Sending...";
   const { error } = await sb.from("payments").insert({ user_id: user.id, purpose: payCtx.purpose, ref_id: payCtx.refId, amount_usd: payCtx.amountUsd, reference: ref });
@@ -67,8 +69,24 @@ $("payGo").onclick = async () => {
   toast("Thanks! We will confirm your payment soon.");
 };
 
-/* When the visitor comes back from the payment page */
-if (new URLSearchParams(location.search).get("razorpay_payment_link_status") === "paid") {
-  toast("Payment received! Your account or spot is being activated.");
+/* When the visitor comes back from the payment page: wait until the payment is confirmed */
+(async function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get("razorpay_payment_link_status") !== "paid") return;
+  const pid = q.get("razorpay_payment_link_reference_id");
   history.replaceState(null, "", location.pathname);
-}
+  toast("Payment received. Activating, please wait...");
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !pid) return;
+  for (let i = 0; i < 15; i++) {
+    const { data } = await sb.from("payments").select("status,purpose").eq("id", pid).maybeSingle();
+    if (data && data.status === "confirmed") {
+      toast("Payment confirmed!");
+      user = session.user;
+      if (data.purpose === "account") openSell(); else openMine();
+      return;
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  toast("Still confirming. Please check again in a minute.");
+})();

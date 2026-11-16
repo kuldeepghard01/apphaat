@@ -202,3 +202,10 @@ dialog.wide{width:min(96vw,720px)}
 .steps{padding-left:20px;margin:10px 0}
 .steps li{margin-bottom:12px}
 .safe.ok{border-left-color:var(--green)}
+.legal{max-width:720px;margin:0 auto;padding:16px 16px 8px}
+.legal h1{font-size:30px;margin:8px 0 2px}
+.legal h2{font-size:19px;margin:22px 0 6px}
+.legal p,.legal li{overflow-wrap:anywhere}
+.legal ul{padding-left:20px}
+.legal-links{margin-top:10px}
+.legal-links a{color:var(--muted)}
