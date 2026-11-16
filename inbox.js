@@ -1,5 +1,3 @@
-<meta name="apphaat-verify" content="ff1daf8e15">
-
 /* AppHaat: inbox and chat between buyers and sellers */
 let thread = null;
 
