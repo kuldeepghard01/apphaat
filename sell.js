@@ -73,19 +73,22 @@ $("sellGo").onclick = async () => {
     }
     payload.screenshots = urls;
   }
-  let error;
+  let error, newId = null;
   if (editingId) {
     const r = await sb.from("listings").update(payload).eq("id", editingId).select("id");
     error = r.error || (!r.data || !r.data.length ? { message: "not saved" } : null);
   } else {
-    ({ error } = await sb.from("listings").insert({ owner_id: user.id, ...payload }));
+    const ins = await sb.from("listings").insert({ owner_id: user.id, ...payload }).select("id").single();
+    error = ins.error; newId = ins.data ? ins.data.id : null;
   }
   $("sellGo").disabled = false;
   if (error) { m.className = "msg err"; m.textContent = "Could not save your listing. Please try again."; console.error(error); return; }
-  const relink = editingId && link !== editingLink, wasEdit = !!editingId;
+  const relink = editingId && link !== editingLink, wasEdit = !!editingId, editedId = editingId;
   editingId = null; clearForm(); $("sellDlg").close();
-  toast(wasEdit ? (relink ? "Saved. The link changed, so it needs review and verification again." : "Changes saved.") : "Listing submitted. It goes live after review.");
-  load(); openMine();
+  toast(wasEdit ? (relink ? "Saved. The link changed, so it needs review and verification again." : "Changes saved.") : "Listing submitted. Next step: verify ownership.");
+  load();
+  const vid = wasEdit ? (relink ? editedId : null) : newId;
+  if (vid) openVerify(vid); else openMine();
 };
 
 const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden", sold: "Sold" };
@@ -112,7 +115,7 @@ async function openMine(){
       <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
       <div class="meta"><span>${(st[l.id] || {}).views || 0} views</span><span>${(st[l.id] || {}).views_7d || 0} in 7 days</span><span>${(ch[l.id] || new Set()).size} chats</span></div>
       <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${l.status === "approved" ? `<button class="btn small ghost soldBtn" data-id="${esc(l.id)}">Mark as sold</button>` : ""}${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
-      ${l.verified ? "" : `<div class="safe">To get verified, put this code on your website inside the head tag as <b>&lt;meta name="apphaat-verify" content="${esc(l.verify_code)}"&gt;</b>, or in your app store description. Then contact ${supportHtml()}. Only verified listings can be featured.</div><div class="row"><button class="btn small verBtn" data-id="${esc(l.id)}">Verify now</button></div>`}
+      ${l.verified ? "" : `<div class="row"><button class="btn small gold verOpen" data-id="${esc(l.id)}">Verify ownership (2 min)</button></div>`}
       ${l.status === "approved" && l.verified ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
       ${inboxHtml(by[l.id] || [], l.title)}
     </div>`).join("");
