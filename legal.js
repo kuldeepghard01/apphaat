@@ -8,3 +8,13 @@ settingsReady.then(() => {
     else el.textContent = v;
   });
 });
+
+/* Pricing page: show the current prices from Admin > Settings */
+const priceBox = document.getElementById("priceBox");
+if (priceBox) settingsReady.then(() => {
+  const inr = (usd) => "\u20B9" + Math.round(usd * USD_INR).toLocaleString("en-IN");
+  const both = (usd) => money(usd) + " (about " + inr(usd) + ")";
+  const rows = [["Seller account fee (one time)", ACCOUNT_FEE > 0 ? both(ACCOUNT_FEE) : "Free"]]
+    .concat(Object.keys(SLOT_PRICES).map(Number).sort((a, b) => a - b).map(k => ["Featured Spot " + k + " (per 7 days)", both(SLOT_PRICES[k])]));
+  priceBox.innerHTML = rows.map(([a, b]) => `<div><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join("");
+});
