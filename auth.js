@@ -66,5 +66,10 @@ function paintUser(){
 $("avatarBtn").onclick = openProfile;
 $("loginBtn").onclick = () => openAuth("login");
 $("sellBtn").onclick = openSell;
-sb.auth.onAuthStateChange((_ev, session) => { user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); if (_ev === "PASSWORD_RECOVERY") openNewPassword(true); });
-sb.auth.getSession().then(({ data }) => { user = data.session ? data.session.user : null; paintUser(); syncAdmin(); });
+function applySession(session){ user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); }
+sb.auth.onAuthStateChange((_ev, session) => {
+  const d = authDecision(_ev, session);
+  if (d !== "wait") applySession(d === "in" ? session : null);
+  if (_ev === "PASSWORD_RECOVERY") openNewPassword(true);
+});
+sb.auth.getSession().then(({ data }) => { if (data.session) { authDecision("GET_SESSION", data.session); applySession(data.session); } });
