@@ -21,7 +21,7 @@ async function openDashboard(){
   if (!$("dashDlg").open) $("dashDlg").showModal();
   const [a, d] = await Promise.all([sb.rpc("seller_dashboard", { days: dashDays }), sb.rpc("seller_views_daily", { days: 14 })]);
   if (a.error) { $("dash").innerHTML = '<div class="empty">Could not load your dashboard. Please try again.</div>'; return; }
-  const rows = a.data || [];
+  const rows = (a.data || []).filter(r => r.status !== "deleted");
   if (!rows.length) { $("dash").innerHTML = '<div class="empty">You have no listings yet. Tap Sell to add your first one.</div>'; return; }
   const sum = (k) => rows.reduce((t, r) => t + Number(r[k]), 0);
   const stat = (r) => `<div class="stats">${tile("Views", r.views)}${tile("Contacts", r.contacts)}${tile("Saves", r.saves)}${tile("Interested", r.interested)}</div>`;

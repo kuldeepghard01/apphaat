@@ -155,6 +155,7 @@ function adminSettings(){
     <input type="file" id="banFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
     <div id="banPreview">${bannerPreviewHtml()}</div>
     <div class="hint">The banner follows your image's own shape, so nothing is stretched or cut. If an image and a message are both set, the image is shown.</div>
+    ${backupHtml()}
     <div class="row"><button class="btn" id="aSaveCfg">Save settings</button></div>
     <div class="msg" id="cMsg" role="status" aria-live="polite"></div>`;
 }

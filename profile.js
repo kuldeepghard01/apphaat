@@ -9,7 +9,7 @@ async function openProfile(){
   if (!$("profDlg").open) $("profDlg").showModal();
   const [p, l] = await Promise.all([
     sb.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    sb.from("listings").select("id,status").eq("owner_id", user.id)
+    sb.from("listings").select("id,status").eq("owner_id", user.id).neq("status", "deleted")
   ]);
   const me = p.data || {}, mine = l.data || [], ids = mine.map(x => x.id);
   let views = 0, chats = 0;

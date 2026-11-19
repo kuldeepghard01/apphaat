@@ -19,7 +19,7 @@ function openEdit(l){
   $("sellDlg").showModal();
 }
 async function openSell(){
-  editingId = null; clearForm();
+  editingId = null; clearForm(); restoreDraft();
   $("sellHead").textContent = "List your app or website"; $("sellGo").textContent = "Submit for review";
   if (!user) { openAuth("login", "Please log in to list an app or website."); return; }
   await settingsReady;
@@ -84,20 +84,20 @@ $("sellGo").onclick = async () => {
   $("sellGo").disabled = false;
   if (error) { m.className = "msg err"; m.textContent = "Could not save your listing. Please try again."; console.error(error); return; }
   const relink = editingId && link !== editingLink, wasEdit = !!editingId, editedId = editingId;
-  editingId = null; clearForm(); $("sellDlg").close();
+  editingId = null; clearForm(); if (!wasEdit) clearDraft(); $("sellDlg").close();
   toast(wasEdit ? (relink ? "Saved. The link changed, so it needs review and verification again." : "Changes saved.") : "Listing submitted. Next step: verify ownership.");
   load();
   const vid = wasEdit ? (relink ? editedId : null) : newId;
   if (vid) openVerify(vid); else openMine();
 };
 
-const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden", sold: "Sold" };
+const STATUS = { pending: "Pending review", approved: "Live", rejected: "Rejected", hidden: "Hidden", sold: "Sold", deleted: "Removed" };
 async function openMine(){
   $("mineList").innerHTML = '<div class="empty">Loading...</div>';
   if (!$("mineDlg").open) $("mineDlg").showModal();
   const { data, error } = await sb.from("listings")
     .select("*")
-    .eq("owner_id", user.id).order("created_at", { ascending: false });
+    .eq("owner_id", user.id).neq("status", "deleted").order("created_at", { ascending: false });
   if (error) { $("mineList").innerHTML = '<div class="empty">Could not load your listings.</div>'; return; }
   mineCache = data;
   if (!data.length) { $("mineList").innerHTML = '<div class="empty">You have no listings yet.</div>'; return; }
@@ -114,7 +114,7 @@ async function openMine(){
       <div class="mrow"><strong>${esc(l.title)}</strong><span class="tag">${esc(STATUS[l.status] || l.status)}</span></div>
       <div class="meta">${l.verified ? '<span class="ok">Verified &#10003;</span>' : "<span>Not verified yet</span>"}</div>
       <div class="meta"><span>${(st[l.id] || {}).views || 0} views</span><span>${(st[l.id] || {}).views_7d || 0} in 7 days</span><span>${(ch[l.id] || new Set()).size} chats</span></div>
-      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${l.status === "approved" ? `<button class="btn small ghost soldBtn" data-id="${esc(l.id)}">Mark as sold</button>` : ""}${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Delete</button></div>
+      <div class="row"><button class="btn small ghost viewBtn" data-id="${esc(l.id)}">View</button>${l.status === "approved" ? `<button class="btn small ghost soldBtn" data-id="${esc(l.id)}">Mark as sold</button>` : ""}${safeUrl(l.link) ? `<a class="btn small ghost" href="${esc(safeUrl(l.link))}" target="_blank" rel="noopener noreferrer">Visit site</a>` : ""}<button class="btn small ghost editBtn" data-id="${esc(l.id)}">Edit</button><button class="btn small ghost delBtn" data-id="${esc(l.id)}">Remove</button></div>
       ${l.verified ? "" : `<div class="row"><button class="btn small gold verOpen" data-id="${esc(l.id)}">Verify ownership (2 min)</button></div>`}
       ${l.status === "approved" && l.verified ? `<div class="row"><button class="btn small featBtn" data-id="${esc(l.id)}" data-title="${esc(l.title)}">Get featured</button></div>` : ""}
       ${inboxHtml(by[l.id] || [], l.title)}
@@ -164,11 +164,11 @@ document.addEventListener("click", async e => {
   const eb = e.target.closest(".editBtn"), db = e.target.closest(".delBtn");
   if (eb) { const l = mineCache.find(x => x.id === eb.dataset.id); if (l) { $("mineDlg").close(); openEdit(l); } return; }
   if (!db) return;
-  if (!confirm("Delete this listing permanently? Any featured slot on it will be lost too.")) return;
+  if (!confirm("Remove this listing from AppHaat? Buyers will no longer see it. Your data is kept safely, and support can restore it.")) return;
   db.disabled = true;
-  const r = await sb.from("listings").delete().eq("id", db.dataset.id).select("id");
-  if (r.error || !r.data || !r.data.length) { toast("Could not delete the listing."); db.disabled = false; return; }
-  toast("Listing deleted."); load(); openMine();
+  const r = await sb.rpc("remove_listing", { lid: db.dataset.id });
+  if (r.error) { toast(r.error.message); db.disabled = false; return; }
+  toast("Listing removed."); load(); openMine();
 });
 
 /* Hero and footer shortcuts */
