@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="style.css">
 
 </head>
-<body>
+<body class="auth-pending">
 
 <div class="banner" id="banner" hidden></div>
 <header class="top">
@@ -32,10 +32,44 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section id="memberHome" class="member-only">
+    <h1 id="memHello" style="font-size:26px">Welcome back</h1>
+    <div class="hint" id="memStatus"></div>
+    <div class="stats" id="memKpi" style="margin:12px 0"></div>
+    <h2 class="sec-title">Quick actions</h2>
+    <div class="qa-grid">
+      <button class="qa" data-go="sell"><span>&#10133;</span>Sell an app or website</button>
+      <button class="qa" data-go="mine"><span>&#128193;</span>My listings</button>
+      <button class="qa" data-go="offers"><span>&#129309;</span>Offers</button>
+      <button class="qa" data-go="inbox"><span>&#128172;</span>Inbox</button>
+      <button class="qa" data-go="wish"><span>&#9825;</span>Wishlist</button>
+      <button class="qa" data-go="dash"><span>&#128202;</span>Seller dashboard</button>
+      <button class="qa" data-go="post"><span>&#128269;</span>Post what I want to buy</button>
+      <button class="qa" data-go="estimate"><span>&#128176;</span>Value estimate</button>
+    </div>
+    <h2 class="sec-title">Needs your attention</h2>
+    <div id="memAttn"></div>
+    <h2 class="sec-title">Recent activity</h2>
+    <div id="memAct"></div>
+    <h2 class="sec-title">New on AppHaat</h2>
+    <div class="grid compact" id="memRec"></div>
+  </section>
+
+  <section class="hero landing-only">
+    <span class="eyebrow">International marketplace for apps and websites</span>
     <h1>Buy and sell apps and websites with confidence</h1>
-    <p>Verified listings, direct contact with sellers, and promotion slots that put your listing in front of buyers.</p>
+    <p>Verified listings, direct contact with sellers, offers you can counter, and promotion spots that put your listing in front of buyers.</p>
     <div class="row"><button class="btn gold" id="heroSell">Sell now</button><button class="btn ghost" id="heroEst">Free value estimate</button><button class="btn ghost" id="heroBrowse">Browse listings</button></div>
+    <ul class="ticks"><li>Free for buyers</li><li>0% commission on sales</li><li>Verified ownership</li><li>Prices in USD and INR</li></ul>
+  </section>
+
+  <section class="statstrip landing-only" aria-label="AppHaat in numbers">
+    <div><b id="stLive">0</b><span>live listings</span></div>
+    <div><b id="stVer">0</b><span>verified listings</span></div>
+    <div><b id="stSold">0</b><span>deals closed</span></div>
+    <div><b id="stReq">0</b><span>buyer requests</span></div>
+    <div><b>0%</b><span>commission on sales</span></div>
+    <div><b>2 min</b><span>to verify ownership</span></div>
   </section>
 
   <div class="homesearch"><input class="search" id="homeQ" type="search" placeholder="Search apps and websites" aria-label="Search"><button class="btn" id="homeGo">Search</button></div>
@@ -78,22 +112,77 @@
   <div class="row" id="seeAllRow" hidden><button class="btn" id="seeAll">See all listings</button></div>
   <div class="empty" id="homeEmpty" hidden>No listings yet. Be the first to list yours.</div>
 
-  
+  <section class="landing-only">
+    <h2 class="sec-title">Browse by category</h2>
+    <p class="hint" style="margin:-4px 0 10px">Find the kind of app or website you want. Tap a category.</p>
+    <div class="cat-grid" id="catGrid"></div>
+  </section>
 
-  
+  <section class="landing-only">
+    <h2 class="sec-title">How AppHaat works</h2>
+    <div class="chips" style="margin-bottom:10px"><button class="chip hwTab" data-k="seller" aria-pressed="true">For sellers</button><button class="chip hwTab" data-k="buyer" aria-pressed="false">For buyers</button></div>
+    <ol class="how-steps" id="hwSeller">
+      <li><b>List it</b><span>Add your app or website with its price, revenue, traffic and screenshots.</span></li>
+      <li><b>Verify ownership</b><span>Place a small code on your site or app page. It takes about 2 minutes and earns the Verified badge.</span></li>
+      <li><b>Get offers</b><span>Buyers message you and send offers. Accept, decline or counter any offer.</span></li>
+      <li><b>Close the deal</b><span>Agree the payment with the buyer, then mark the listing as sold.</span></li>
+    </ol>
+    <ol class="how-steps" id="hwBuyer" hidden>
+      <li><b>Search and filter</b><span>Filter by website, Android or iOS, price, revenue, traffic and verified listings.</span></li>
+      <li><b>Check the details</b><span>See revenue, profit, age, screenshots and the seller's profile. Save favourites.</span></li>
+      <li><b>Make an offer</b><span>Send an offer, chat with the seller, and counter until you agree.</span></li>
+      <li><b>Or post a request</b><span>Tell sellers what you want to buy. Matching sellers contact you.</span></li>
+    </ol>
+  </section>
 
-  <section class="how" aria-label="How AppHaat works">
-    <div role="button" tabindex="0" data-info="how-list"><b>1. List</b><span>Add your app or website in minutes.</span></div>
-    <div role="button" tabindex="0" data-info="how-verify"><b>2. Get verified</b><span>Prove ownership and earn the Verified badge.</span></div>
-    <div role="button" tabindex="0" data-info="how-connect"><b>3. Connect</b><span>Buyers message you directly. You close the deal.</span></div>
+  <section class="landing-only">
+    <h2 class="sec-title">Why people choose AppHaat</h2>
+    <div class="poster-grid">
+      <button class="poster" data-info="how-verify"><span class="poster-ic">&#9989;</span><b>Verified ownership</b><span>Sellers prove they own it with a simple code before getting the badge.</span></button>
+      <button class="poster" data-go="offers"><span class="poster-ic">&#129309;</span><b>Offers and counters</b><span>Negotiate in the open. Accept, decline or counter, all inside AppHaat.</span></button>
+      <button class="poster" data-go="demand"><span class="poster-ic">&#128269;</span><b>Buyer demand board</b><span>Post what you want to buy and let matching sellers come to you.</span></button>
+      <button class="poster" data-go="estimate"><span class="poster-ic">&#128176;</span><b>Free value estimate</b><span>A fair price range from real market data, before you list or offer.</span></button>
+      <button class="poster" data-go="sell"><span class="poster-ic">&#128276;</span><b>Instant alerts</b><span>Get a push notification when a buyer saves, contacts or makes an offer.</span></button>
+      <button class="poster" data-info="how-connect"><span class="poster-ic">&#128274;</span><b>Your data stays safe</b><span>No card details stored, and removed data is kept safely. No commission on sales.</span></button>
+    </div>
+  </section>
+
+  <section id="newsWrap" hidden>
+    <h2 class="sec-title">News and updates</h2>
+    <div class="news-row" id="newsRow"></div>
+  </section>
+
+  <section class="band landing-only">
+    <h2>What is your website or app worth?</h2>
+    <p>Get a free value range based on your revenue, profit, traffic and age. It takes one minute.</p>
+    <button class="btn gold" data-go="estimate">Get a free estimate</button>
+  </section>
+
+  <section class="landing-only faq">
+    <h2 class="sec-title">Questions people ask</h2>
+    <details><summary>Is AppHaat free to use?</summary><p>Browsing, saving, offers and chat are free for buyers. Sellers pay a small one-time account fee (the first sign-ups are free) and can pay for an optional featured spot. We take no commission on sales. See <a href="pricing.html">Pricing</a>.</p></details>
+    <details><summary>How does verification work?</summary><p>We give you a small code. You place it on your website or app page, then tap Check now. If we find it, your listing gets the Verified badge. It takes about two minutes.</p></details>
+    <details><summary>Does AppHaat handle the payment for a deal?</summary><p>No. Buyer and seller agree the payment between themselves. For larger amounts, use a trusted escrow service and check ownership before you pay.</p></details>
+    <details><summary>What happens when an offer is accepted?</summary><p>Both sides have agreed on a price. They continue in chat to finish the deal, and the seller marks the listing as sold. Only deals with an accepted offer appear in Recently sold.</p></details>
+    <details><summary>Which currencies can I use?</summary><p>Listings can be priced in US dollars or Indian rupees, and visitors can switch the display currency at any time.</p></details>
+    <details><summary>Is every listing checked?</summary><p>Every listing is reviewed before it goes live. The Verified badge shows that ownership was proven. Numbers such as revenue and traffic are entered by sellers, so always do your own checks.</p></details>
+    <details><summary>Is my data safe?</summary><p>We never store card details. Removed listings are kept safely, and backups are taken regularly. Read our <a href="privacy.html">Privacy Policy</a>.</p></details>
+    <details><summary>How do refunds work?</summary><p>See our <a href="refund.html">Refund Policy</a>. Fees for featured spots that have not started can be refunded.</p></details>
+  </section>
+
+  <section class="band band-dark landing-only">
+    <h2>Ready to list your app or website?</h2>
+    <p>Reach buyers from around the world. List in minutes and keep 100% of your sale.</p>
+    <div class="row" style="justify-content:center"><button class="btn gold" data-go="sell">Sell now</button><button class="btn ghost" data-go="browse">Browse listings</button></div>
   </section>
 </main>
 
 <footer class="foot">
   <div class="fcols">
-    <div><b>Buy</b><a href="#" id="footBrowse">Browse listings</a><a href="#" id="footDemand">Buyer demand board</a></div>
-    <div><b>Sell</b><a href="#" id="footSell">List your app or website</a><a href="#" id="footAd">Promote your listing</a></div>
-    <div><b>AppHaat</b><span>Verified listings. No commission on sales.</span></div>
+    <div><b>AppHaat</b><span>The international marketplace to buy and sell apps and websites. Verified listings. No commission on sales.</span></div>
+    <div><b>Buy</b><a href="#" id="footBrowse">Browse listings</a><a href="#" id="footDemand">Buyer demand board</a><a href="pricing.html">Pricing</a></div>
+    <div><b>Sell</b><a href="#" id="footSell">List your app or website</a><a href="#" id="footAd">Promote your listing</a><a href="#" id="footEst">Free value estimate</a></div>
+    <div><b>Company</b><a href="about.html">About</a><a href="contact.html">Contact</a><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Refund Policy</a></div>
   </div>
   <p>AppHaat is only a platform. Deals are made between the buyer and the seller. Always verify ownership before you pay.</p>
   <p class="legal-links"><a href="about.html">About</a> &middot; <a href="pricing.html">Pricing</a> &middot; <a href="terms.html">Terms of Service</a> &middot; <a href="privacy.html">Privacy Policy</a> &middot; <a href="refund.html">Refund Policy</a> &middot; <a href="contact.html">Contact</a></p>
@@ -221,6 +310,7 @@
       <button class="chip" data-tab="pay" aria-pressed="false">Pay methods</button>
       <button class="chip" data-tab="reports" aria-pressed="false">Reports</button>
       <button class="chip" data-tab="settings" aria-pressed="false">Settings</button>
+      <button class="chip" data-tab="news" aria-pressed="false">News</button>
     </div>
     <div class="msg" id="adminMsg" role="status" aria-live="polite"></div>
     <div id="adminBody"></div>
@@ -362,10 +452,12 @@
 <script src="offers.js"></script>
 <script src="sold.js"></script>
 <script src="demands.js"></script>
+<script src="landing.js"></script>
 <script src="admin.js"></script>
 <script src="admin-pay.js"></script>
 <script src="admin-banner.js"></script>
 <script src="admin-backup.js"></script>
+<script src="admin-news.js"></script>
 <script src="authx.js"></script>
 <script src="auth.js"></script>
 </body>

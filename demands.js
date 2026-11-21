@@ -22,6 +22,7 @@ function demandCard(d, full){
     <div class="row">${myDemandIds.has(d.id) ? '<span class="tag">Your request</span>' : `<button class="btn small demRespond" data-id="${esc(d.id)}">I have this</button>`}</div></div>`;
 }
 function renderDemandPreview(){
+  if (typeof renderLanding === "function") setTimeout(renderLanding, 0);
   $("demandPreview").innerHTML = demands.length ? demands.slice(0, 3).map(d => demandCard(d, false)).join("")
     : '<div class="empty">No requests yet. Tell sellers what you want to buy.</div>';
 }

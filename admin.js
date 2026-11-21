@@ -35,6 +35,7 @@ async function renderAdmin(){
     if (adminTab === "listings") body.innerHTML = await adminListings();
     else if (adminTab === "requests") body.innerHTML = await adminRequests();
     else if (adminTab === "users") body.innerHTML = await adminUsers();
+    else if (adminTab === "news") body.innerHTML = await adminNews();
     else if (adminTab === "settings") body.innerHTML = adminSettings();
     else if (adminTab === "pay") body.innerHTML = await adminMethods();
     else if (adminTab === "payments") body.innerHTML = await adminPayments();

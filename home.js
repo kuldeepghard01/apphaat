@@ -106,6 +106,7 @@ function renderHome(){
   $("seeAllRow").hidden = all.length <= featIds.size + trend.length + latest.length;
   $("seeAll").textContent = "See all " + all.length + " listings";
   $("homeEmpty").hidden = !homeLoaded || all.length > 0;
+  if (typeof renderLanding === "function") renderLanding();
 }
 
 async function load(){

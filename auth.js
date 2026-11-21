@@ -66,7 +66,13 @@ function paintUser(){
 $("avatarBtn").onclick = openProfile;
 $("loginBtn").onclick = () => openAuth("login");
 $("sellBtn").onclick = openSell;
-function applySession(session){ user = session ? session.user : null; paintUser(); setTimeout(syncAdmin, 0); }
+function applySession(session){
+  user = session ? session.user : null;
+  const b = document.body;
+  b.classList.remove("auth-pending"); b.classList.toggle("in", !!session); b.classList.toggle("out", !session);
+  paintUser(); setTimeout(syncAdmin, 0);
+  if (session) renderMember();
+}
 sb.auth.onAuthStateChange((_ev, session) => {
   const d = authDecision(_ev, session);
   if (d !== "wait") applySession(d === "in" ? session : null);

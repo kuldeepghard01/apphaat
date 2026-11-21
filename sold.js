@@ -7,6 +7,7 @@ async function loadSold(){
   renderSold();
 }
 function renderSold(){
+  if (typeof renderLanding === "function") setTimeout(renderLanding, 0);
   $("soldWrap").hidden = !soldList.length;
   $("soldRow").innerHTML = soldList.slice(0, 12).map(s => `<div class="sold-card">
     <span class="tag">SOLD</span>
