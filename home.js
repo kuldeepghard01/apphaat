@@ -29,6 +29,9 @@ function cardHtml(l, rank, small, extra){
 function fillSuggest(){
   const names = [...new Set([...CATEGORIES, ...all.map(l => l.title)])].filter(Boolean).slice(0, 80);
   $("sugList").innerHTML = names.map(x => `<option value="${esc(x)}">`).join("");
+  const keep = $("fCountry").value, set = new Set(all.map(l => (l.country || "").trim()).filter(Boolean));
+  $("fCountry").innerHTML = '<option value="">All countries</option>' + [...set].sort().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  $("fCountry").value = set.has(keep) ? keep : "";
 }
 
 function similar(ref, n){
@@ -54,7 +57,7 @@ function render(){
   const platOk = (l) => filterType === "all" || (filterType === "website" ? l.type === "website" : l.type === "app" && (l.platform === filterType || l.platform === "cross"));
   const text = (l) => [l.title, l.category, l.description, l.country, platformLabel(l), l.platform === "ios" || l.platform === "cross" ? "iphone" : "", l.type === "website" ? "web site" : ""].join(" ").toLowerCase();
   const score = (l) => tokens.reduce((s, t) => s + ((l.title || "").toLowerCase().includes(t) ? 3 : 0) + ((l.category || "").toLowerCase().includes(t) ? 2 : 0), 0);
-  const match = (l) => platOk(l) && (!cat || l.category === cat) && (!onlyVer || l.verified) &&
+  const match = (l) => platOk(l) && (!cat || l.category === cat) && (!$("fCountry").value || (l.country || "").trim().toLowerCase() === $("fCountry").value.toLowerCase()) && (!onlyVer || l.verified) &&
     (!onlyNew || Date.now() - new Date(l.created_at).getTime() < 7 * 864e5) &&
     cp(l) >= min && cp(l) <= max &&
     (!minRev || (l.monthly_revenue != null && convert(l.monthly_revenue, l.currency || "USD") >= minRev)) &&
@@ -135,23 +138,19 @@ $("chips").addEventListener("click", e => {
   render();
 });
 
-const catOpts = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join("");
+const catOpts = CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
 $("fCat").innerHTML = '<option value="">All categories</option>' + catOpts;
 $("sCat").innerHTML = '<option value="">Choose a category</option>' + catOpts;
-["fCat", "fMin", "fMax", "fSort", "fVer", "fRev", "fTraffic", "fNew"].forEach(id => $(id).addEventListener("input", () => { browseLimit = 24; render(); }));
+["fCat", "fMin", "fMax", "fSort", "fVer", "fRev", "fTraffic", "fNew", "fCountry"].forEach(id => $(id).addEventListener("input", () => { browseLimit = 24; render(); }));
 $("fClear").onclick = () => {
-  ["fCat", "fMin", "fMax", "fRev", "fTraffic", "q"].forEach(id => { $(id).value = ""; });
+  ["fCat", "fMin", "fMax", "fRev", "fTraffic", "fCountry", "q"].forEach(id => { $(id).value = ""; });
   $("fSort").value = "new"; $("fVer").checked = false; $("fNew").checked = false; query = ""; filterType = "all"; browseLimit = 24;
   document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.t === "all" ? "true" : "false"));
   render();
 };
 
 $("fCur").value = DISPLAY;
-$("fCur").addEventListener("input", () => {
-  DISPLAY = $("fCur").value;
-  try { localStorage.setItem("apphaat_cur", DISPLAY); } catch (e) {}
-  render(); renderPromo();
-});
+$("fCur").addEventListener("input", () => setRegion({ cur: $("fCur").value }));
 
 async function renderPromo(){
   await settingsReady;

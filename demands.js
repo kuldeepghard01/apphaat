@@ -55,7 +55,7 @@ function openDemandForm(){
   $("demForm").innerHTML = `<div class="dlg-head"><h2>What do you want to buy?</h2><button class="x" data-close aria-label="Close">&times;</button></div>
     <label for="dTitle">Your request</label><input class="f" id="dTitle" maxlength="100" placeholder="e.g. WordPress blog under 20,000">
     <label for="dType">Type</label><select class="f" id="dType">${Object.keys(DEM_TYPES).map(k => `<option value="${k}">${esc(DEM_TYPES[k])}</option>`).join("")}</select>
-    <label for="dCat">Category (optional)</label><select class="f" id="dCat"><option value="">Any category</option>${CATEGORIES.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+    <label for="dCat">Category (optional)</label><select class="f" id="dCat"><option value="">Any category</option>${CATEGORIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}</select>
     <label for="dKeys">Keywords (optional, separate with commas)</label><input class="f" id="dKeys" maxlength="100" placeholder="WordPress, blog, travel">
     <label for="dCur">Currency</label><select class="f" id="dCur"><option value="INR">Indian Rupee (&#8377;)</option><option value="USD">US Dollar ($)</option></select>
     <label for="dMax">Maximum budget</label><input class="f" id="dMax" type="number" inputmode="decimal" min="0" step="any">

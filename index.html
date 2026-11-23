@@ -32,6 +32,7 @@
 </header>
 
 <main>
+  <button class="regionstrip" id="regionStrip" aria-label="Country, language and currency"></button>
   <section id="memberHome" class="member-only">
     <h1 id="memHello" style="font-size:26px">Welcome back</h1>
     <div class="hint" id="memStatus"></div>
@@ -116,6 +117,11 @@
     <h2 class="sec-title">Browse by category</h2>
     <p class="hint" style="margin:-4px 0 10px">Find the kind of app or website you want. Tap a category.</p>
     <div class="cat-grid" id="catGrid"></div>
+  </section>
+
+  <section id="ctryWrap" class="landing-only" hidden>
+    <h2 class="sec-title">Browse by country</h2>
+    <div class="chips" id="ctryRow"></div>
   </section>
 
   <section class="landing-only">
@@ -376,6 +382,7 @@
         <input class="f" id="fRev" type="number" inputmode="decimal" min="0" placeholder="Min monthly revenue">
         <input class="f" id="fTraffic" type="number" inputmode="numeric" min="0" placeholder="Min monthly traffic">
         <select class="f" id="fCur" aria-label="Show prices in"><option value="USD">Show prices in USD ($)</option><option value="INR">Show prices in INR (&#8377;)</option></select>
+        <select class="f" id="fCountry" aria-label="Seller country"><option value="">All countries</option></select>
         <label class="chk"><input type="checkbox" id="fVer"> Verified listings only</label>
         <label class="chk"><input type="checkbox" id="fNew"> Newly listed (last 7 days)</label>
       </div>
@@ -392,6 +399,16 @@
   </div>
 </dialog>
 <dialog id="verifyDlg"><div class="dlg"><div class="dlg-head"><h2 id="verTitle">Verify ownership</h2><button class="x" data-close aria-label="Close">&times;</button></div><div id="verBody"></div></div></dialog>
+<dialog id="regionDlg">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Country, language and currency</h2><button class="x" data-close aria-label="Close">&times;</button></div>
+    <label for="rgCountry">Country</label><select class="f" id="rgCountry"></select>
+    <label for="rgLang">Language</label><select class="f" id="rgLang"></select>
+    <label for="rgCur">Currency for prices</label><select class="f" id="rgCur"></select>
+    <div class="hint" style="margin-top:8px">We choose these from your device. Change them any time. Prices in other currencies are approximate.</div>
+    <div class="row"><button class="btn" id="rgSave">Save</button><button class="btn ghost" id="rgAuto">Use automatic</button></div>
+  </div>
+</dialog>
 <dialog id="valDlg">
   <div class="dlg">
     <div class="dlg-head"><h2>Value estimator</h2><button class="x" data-close aria-label="Close">&times;</button></div>
@@ -432,6 +449,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script src="layers.js"></script>
 <script src="config.js"></script>
+<script src="lang-hi.js"></script>
+<script src="i18n.js"></script>
 <script src="session.js"></script>
 <script src="home.js"></script>
 <script src="browse.js"></script>

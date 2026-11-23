@@ -145,6 +145,8 @@ function adminSettings(){
     <input class="f" id="cAuth" type="text" value="${esc(AUTH_PROVIDERS.join(", "))}">
     <label for="cFree">Free accounts for the first N sign-ups (0 means nobody is free)</label>
     <input class="f" id="cFree" type="number" min="0" step="1" value="${esc(FREE_LIMIT)}">
+    <label for="cFx">Other currency rates for the display switch (per 1 US dollar)</label>
+    <input class="f" id="cFx" type="text" autocapitalize="characters" value="${esc(Object.entries(FX).map(([k, v]) => k + "=" + v).join(", "))}">
     <label for="cRate">Rupees per 1 US dollar (used for the INR/USD switch)</label>
     <input class="f" id="cRate" type="number" min="0" step="any" value="${esc(USD_INR)}">
     <label for="cBan">Top banner message (an ad or announcement, leave empty to hide)</label>
@@ -171,7 +173,7 @@ document.addEventListener("click", async e => {
   if (banLink && !/^https?:\/\//i.test(banLink)) banLink = "https://" + banLink;
   if (banLink && !safeUrl(banLink)) { m.className = "msg err"; m.textContent = "The banner link must be a valid web address, for example https://example.com"; return; }
   m.className = "msg"; m.textContent = "Saving...";
-  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "auth_providers", value: $("cAuth").value.trim().toLowerCase() }, { key: "business_name", value: $("cBiz").value.trim() }, { key: "support_phone", value: $("cPhone").value.trim() }, { key: "business_address", value: $("cAddr").value.trim() }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: banLink }];
+  const rows = [{ key: "account_fee", value: String(fee) }, { key: "slot_prices", value: parts.join(",") }, { key: "support_email", value: $("cMail").value.trim() }, { key: "online_pay", value: $("cOnline").value }, { key: "auth_providers", value: $("cAuth").value.trim().toLowerCase() }, { key: "business_name", value: $("cBiz").value.trim() }, { key: "support_phone", value: $("cPhone").value.trim() }, { key: "business_address", value: $("cAddr").value.trim() }, { key: "free_limit", value: String(Math.floor(Number($("cFree").value))) }, { key: "usd_inr", value: String(Number($("cRate").value)) }, { key: "fx_rates", value: $("cFx").value.trim() }, { key: "banner_text", value: $("cBan").value.trim() }, { key: "banner_link", value: banLink }];
   const r = await sb.from("settings").upsert(rows).select("key");
   if (r.error || !r.data || !r.data.length) { m.className = "msg err"; m.textContent = "Could not save: " + (r.error ? r.error.message : "nothing was saved. Make sure the latest SQL was run."); return; }
   await loadSettings(); paintBanner();

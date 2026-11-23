@@ -21,6 +21,11 @@ function renderLanding(){
   const counts = {};
   all.forEach(l => { if (l.category) counts[l.category] = (counts[l.category] || 0) + 1; });
   $("catGrid").innerHTML = CATEGORIES.map(c => `<button class="cat" data-cat-go="${esc(c)}"><span class="cat-ic">${CAT_ICON[c] || ""}</span><b>${esc(c)}</b><span class="hint">${counts[c] || 0} live</span></button>`).join("");
+  const cc = {};
+  all.forEach(l => { const c = (l.country || "").trim(); if (c) cc[c] = (cc[c] || 0) + 1; });
+  const top = Object.entries(cc).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  $("ctryWrap").hidden = !top.length;
+  $("ctryRow").innerHTML = top.map(([c, n]) => `<button class="chip" data-ctry-go="${esc(c)}">${esc(c)} (${n})</button>`).join("");
   if (user) $("memRec").innerHTML = all.filter(l => l.owner_id !== user.id).slice(0, 4).map(l => cardHtml(l, null, true)).join("") || '<div class="empty">Nothing new yet.</div>';
 }
 
@@ -78,6 +83,8 @@ document.addEventListener("click", e => {
   if (g && GO[g.dataset.go]) { GO[g.dataset.go](); return; }
   const c = e.target.closest("[data-cat-go]");
   if (c) { $("fCat").value = c.dataset.catGo; openBrowse(); return; }
+  const k = e.target.closest("[data-ctry-go]");
+  if (k) { $("fCountry").value = k.dataset.ctryGo; openBrowse(); return; }
   const t = e.target.closest(".hwTab");
   if (t) {
     document.querySelectorAll(".hwTab").forEach(b => b.setAttribute("aria-pressed", b === t ? "true" : "false"));

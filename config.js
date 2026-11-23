@@ -7,11 +7,14 @@ let BANNER = { text: "", link: "", image: "", ratio: "" }; // top banner, set fr
 let USD_INR = 88; // rupees per dollar, set from the admin panel (Settings)
 let DISPLAY = "USD";
 try { if (localStorage.getItem("apphaat_cur") === "INR") DISPLAY = "INR"; } catch (e) {}
-function convert(n, from){ n = Number(n); if (from === DISPLAY) return n; return from === "USD" ? n * USD_INR : n / USD_INR; }
+/* Display currencies. USD and INR are the main ones. The others use approximate rates set in Admin > Settings. */
+const CUR = { USD: ["$", "en-US", "US Dollar"], INR: ["\u20B9", "en-IN", "Indian Rupee"], EUR: ["\u20AC", "de-DE", "Euro"], GBP: ["\u00A3", "en-GB", "British Pound"], AED: ["AED ", "en-AE", "UAE Dirham"], AUD: ["A$", "en-AU", "Australian Dollar"], CAD: ["C$", "en-CA", "Canadian Dollar"], SGD: ["S$", "en-SG", "Singapore Dollar"] };
+let FX = { EUR: 0.92, GBP: 0.78, AED: 3.6725, AUD: 1.52, CAD: 1.38, SGD: 1.34 };
+const perUSD = (c) => (c === "USD" ? 1 : c === "INR" ? USD_INR : FX[c] || 1);
+function convert(n, from){ n = Number(n); if (from === DISPLAY) return n; return n / perUSD(from) * perUSD(DISPLAY); }
 function moneyL(l, n){ // amounts of a listing, shown in the visitor's chosen currency
-  const from = l.currency || "USD", v = convert(n, from);
-  const txt = v.toLocaleString(DISPLAY === "INR" ? "en-IN" : "en-US", { maximumFractionDigits: v < 100 ? 2 : 0 });
-  return (from !== DISPLAY ? "\u2248 " : "") + (DISPLAY === "INR" ? "\u20B9" : "$") + txt;
+  const from = l.currency || "USD", v = convert(n, from), c = CUR[DISPLAY] || CUR.USD;
+  return (from !== DISPLAY ? "\u2248 " : "") + c[0] + v.toLocaleString(c[1], { maximumFractionDigits: v < 100 ? 2 : 0 });
 }
 let savedIds = new Set(); // ids of listings the visitor saved to the wishlist
 let AUTH_PROVIDERS = []; // social login buttons to show, set from the admin panel (Settings)
@@ -54,6 +57,7 @@ async function loadSettings(){
     if (r.key === "online_pay") ONLINE_PAY = r.value === "on";
     if (r.key === "free_limit") FREE_LIMIT = Number(r.value) || 0;
     if (r.key === "usd_inr" && Number(r.value) > 0) USD_INR = Number(r.value);
+    if (r.key === "fx_rates") String(r.value || "").split(",").forEach(x => { const [k, v] = x.split("=").map(y => y.trim()); if (CUR[k] && k !== "USD" && k !== "INR" && Number(v) > 0) FX[k] = Number(v); });
     if (r.key === "banner_text") BANNER.text = r.value || "";
     if (r.key === "banner_link") BANNER.link = r.value || "";
     if (r.key === "banner_image") BANNER.image = r.value || "";
