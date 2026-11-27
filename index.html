@@ -57,7 +57,7 @@
     <div class="grid compact" id="memRec"></div>
   </section>
 
-  <section class="hero landing-only">
+  <section class="hero landing-only" data-sec="hero">
     <span class="eyebrow">International marketplace for apps and websites</span>
     <h1>Buy and sell apps and websites with confidence</h1>
     <p>Verified listings, direct contact with sellers, offers you can counter, and promotion spots that put your listing in front of buyers.</p>
@@ -66,7 +66,7 @@
     <a class="hero-link" href="#demos">&#9654; See how AppHaat works</a>
   </section>
 
-  <section class="statstrip landing-only" aria-label="AppHaat in numbers">
+  <section class="statstrip landing-only" aria-label="AppHaat in numbers" data-sec="stats" hidden>
     <div><b id="stLive">0</b><span>live listings</span></div>
     <div><b id="stVer">0</b><span>verified listings</span></div>
     <div><b id="stSold">0</b><span>deals closed</span></div>
@@ -75,7 +75,7 @@
     <div><b>2 min</b><span>to verify ownership</span></div>
   </section>
 
-  <div class="homesearch"><input class="search" id="homeQ" type="search" placeholder="Search apps and websites" aria-label="Search"><button class="btn" id="homeGo">Search</button></div>
+  <div class="homesearch" data-sec="search"><input class="search" id="homeQ" type="search" placeholder="Search apps and websites" aria-label="Search"><button class="btn" id="homeGo">Search</button></div>
 
   <section class="promo-wrap" id="spots">
     <h2 class="sec-title">Get seen first</h2>
@@ -115,7 +115,7 @@
   <div class="row" id="seeAllRow" hidden><button class="btn" id="seeAll">See all listings</button></div>
   <div class="empty" id="homeEmpty" hidden>No listings yet. Be the first to list yours.</div>
 
-  <section class="landing-only">
+  <section class="landing-only" data-sec="categories">
     <h2 class="sec-title">Browse by category</h2>
     <p class="hint" style="margin:-4px 0 10px">Find the kind of app or website you want. Tap a category.</p>
     <div class="cat-grid" id="catGrid"></div>
@@ -126,7 +126,7 @@
     <div class="chips" id="ctryRow"></div>
   </section>
 
-  <section class="landing-only">
+  <section class="landing-only" data-sec="how">
     <h2 class="sec-title">How AppHaat works</h2>
     <div class="chips" style="margin-bottom:10px"><button class="chip hwTab" data-k="seller" aria-pressed="true">For sellers</button><button class="chip hwTab" data-k="buyer" aria-pressed="false">For buyers</button></div>
     <ol class="how-steps" id="hwSeller">
@@ -149,7 +149,7 @@
     <div id="demoCards"></div>
   </section>
 
-  <section class="landing-only">
+  <section class="landing-only" data-sec="why">
     <h2 class="sec-title">Why people choose AppHaat</h2>
     <div class="poster-grid">
       <button class="poster" data-info="how-verify"><span class="poster-ic">&#9989;</span><b>Verified ownership</b><span>Sellers prove they own it with a simple code before getting the badge.</span></button>
@@ -166,13 +166,13 @@
     <div class="news-row" id="newsRow"></div>
   </section>
 
-  <section class="band landing-only">
+  <section class="band landing-only" data-sec="estimator">
     <h2>What is your website or app worth?</h2>
     <p>Get a free value range based on your revenue, profit, traffic and age. It takes one minute.</p>
     <button class="btn gold" data-go="estimate">Get a free estimate</button>
   </section>
 
-  <section class="landing-only faq">
+  <section class="landing-only faq" data-sec="faq">
     <h2 class="sec-title">Questions people ask</h2>
     <details><summary>Is AppHaat free to use?</summary><p>Browsing, saving, offers and chat are free for buyers. Sellers pay a small one-time account fee (the first sign-ups are free) and can pay for an optional featured spot. We take no commission on sales. See <a href="pricing.html">Pricing</a>.</p></details>
     <details><summary>How does verification work?</summary><p>We give you a small code. You place it on your website or app page, then tap Check now. If we find it, your listing gets the Verified badge. It takes about two minutes.</p></details>
@@ -184,7 +184,7 @@
     <details><summary>How do refunds work?</summary><p>See our <a href="refund.html">Refund Policy</a>. Fees for featured spots that have not started can be refunded.</p></details>
   </section>
 
-  <section class="band band-dark landing-only">
+  <section class="band band-dark landing-only" data-sec="final_cta">
     <h2>Ready to list your app or website?</h2>
     <p>Reach buyers from around the world. List in minutes and keep 100% of your sale.</p>
     <div class="row" style="justify-content:center"><button class="btn gold" data-go="sell">Sell now</button><button class="btn ghost" data-go="browse">Browse listings</button></div>
@@ -325,6 +325,7 @@
       <button class="chip" data-tab="reports" aria-pressed="false">Reports</button>
       <button class="chip" data-tab="settings" aria-pressed="false">Settings</button>
       <button class="chip" data-tab="news" aria-pressed="false">News</button>
+      <button class="chip" data-tab="stats" aria-pressed="false">Site stats</button>
     </div>
     <div class="msg" id="adminMsg" role="status" aria-live="polite"></div>
     <div id="adminBody"></div>
@@ -486,7 +487,9 @@
 <script src="admin-banner.js"></script>
 <script src="admin-backup.js"></script>
 <script src="admin-news.js"></script>
+<script src="admin-stats.js"></script>
 <script src="authx.js"></script>
 <script src="auth.js"></script>
+<script src="tracker.js"></script>
 </body>
 </html>
